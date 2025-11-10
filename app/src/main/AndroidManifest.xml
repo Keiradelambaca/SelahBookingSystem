@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Internet permission required for Supabase API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.Selah">
+
+        <!-- Launcher / Login -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Home (post-login) -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+
+        <!-- Signup flow: screen 1 (chooser?) -->
+        <activity
+            android:name=".SignupActivity1"
+            android:exported="false" />
+
+        <!-- Signup: Customer -->
+        <activity
+            android:name=".SignupActivityCustomer"
+            android:exported="false" />
+
+        <!-- Signup: Service Provider (uses activity_signup_sp1.xml) -->
+        <activity
+            android:name=".SignupActivityServiceProvider1"
+            android:exported="false" />
+
+        <!-- Welcome opening page: Customer (uses activity_welcome_customer.xml) -->
+        <activity
+            android:name=".WelcomeCustomerActivity"
+            android:exported="false"/>
+
+        <!-- Welcome opening page: Provider (uses activity_welcome_provider.xml) -->
+        <activity
+            android:name=".WelcomeProviderActivity"
+            android:exported="false"/>
+
+        <!-- User book appointment/choose a SP -->
+        <activity android:name=".SelectProviderActivity" />
+
+        <!-- Preloaded fonts -->
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+    </application>
+
+</manifest>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/signaturePink">
+
+    <ImageView
+        android:id="@+id/Logo"
+        android:layout_width="154dp"
+        android:layout_height="154dp"
+        android:src="@drawable/selah_logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.093" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/loginCard"
+        android:layout_width="363dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#F8F8F8"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="304dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="35dp"
+                android:fontFamily="@font/poppins"
+                android:text="@string/are_you_signing_up_as_a"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/customerButton"
+                android:layout_width="170dp"
+                android:layout_height="55dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/buttonPurple"
+                android:fontFamily="@font/poppins"
+                android:text="@string/customer"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"/>
+
+            <Button
+                android:id="@+id/providerButton"
+                android:layout_width="170dp"
+                android:layout_height="55dp"
+                android:layout_marginBottom="40dp"
+                android:backgroundTint="@color/buttonPurple"
+                android:fontFamily="@font/poppins"
+                android:text="@string/service_provider"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/backToLoginText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins"
+                android:text="@string/back_to_login"
+                android:textColor="#666666"
+                android:textSize="12sp" />
+
+
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

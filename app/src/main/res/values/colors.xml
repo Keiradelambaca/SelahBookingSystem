@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="signaturePink">#F9CBDF</color>
+    <color name="buttonPurple">#C18AE6</color>
+    <color name="softWhite">#F3F2E9</color>
+    <color name="textBoxGrey">#D9D9D9</color>
+    <color name="textGrey">#595959</color>
+    <color name="invalidRed">#8F0101</color>
+</resources>

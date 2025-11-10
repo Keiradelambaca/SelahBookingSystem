@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">android</string>
+    <string name="service_provider">Service Provider</string>
+    <string name="back_to_login">back to Login</string>
+    <string name="customer">Customer</string>
+    <string name="are_you_signing_up_as_a">Are you Signing up as a</string>
+    <string name="or_signup">Or SignUp</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+</resources>
