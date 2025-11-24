@@ -8,6 +8,7 @@ public class RoleStore {
     private static final String KEY_ROLE_PREFIX = "role_";           // role_{email}
     private static final String KEY_PHONE_PREFIX = "phone_";         // phone_{email}
     private static final String KEY_EIRCODE_PREFIX = "eircode_";     // eircode_{email}
+    private static final String KEY_NAME_PREFIX = "name_";
 
     public enum Role { CUSTOMER, PROVIDER, UNKNOWN }
 
@@ -15,14 +16,17 @@ public class RoleStore {
         return ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
     }
 
-    public static void saveCustomer(Context ctx, String email, String phone) {
+    // CUSTOMER
+    public static void saveCustomer(Context ctx, String email, String phone, String name) {
         prefs(ctx).edit()
                 .putString(KEY_ROLE_PREFIX + email, Role.CUSTOMER.name())
                 .putString(KEY_PHONE_PREFIX + email, phone)
+                .putString(KEY_NAME_PREFIX + email, name)
                 .remove(KEY_EIRCODE_PREFIX + email)
                 .apply();
     }
 
+    // PROVIDER
     public static void saveProvider(Context ctx, String email, String phone, String eircode) {
         prefs(ctx).edit()
                 .putString(KEY_ROLE_PREFIX + email, Role.PROVIDER.name())
@@ -31,6 +35,7 @@ public class RoleStore {
                 .apply();
     }
 
+    // GETTERS
     public static Role getRole(Context ctx, String email) {
         String v = prefs(ctx).getString(KEY_ROLE_PREFIX + email, null);
         if (v == null) return Role.UNKNOWN;
@@ -43,5 +48,9 @@ public class RoleStore {
 
     public static String getEircode(Context ctx, String email) {
         return prefs(ctx).getString(KEY_EIRCODE_PREFIX + email, "");
+    }
+
+    public static String getName(Context ctx, String email) {
+        return prefs(ctx).getString(KEY_NAME_PREFIX + email, "");
     }
 }

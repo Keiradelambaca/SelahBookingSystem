@@ -14,7 +14,7 @@
         android:layout_width="154dp"
         android:layout_height="154dp"
         android:src="@drawable/selah_logo"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/loginCard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +35,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="430dp"
+            android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:padding="20dp">
@@ -49,6 +49,14 @@
                 android:text="Customer Sign Up"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/poppins"
+                android:hint="Name" />
 
             <EditText
                 android:id="@+id/emailEditText"
@@ -75,14 +83,6 @@
                 android:layout_marginBottom="12dp"
                 android:fontFamily="@font/poppins"
                 android:hint="@string/password"
-                android:inputType="textPassword" />
-
-            <EditText
-                android:id="@+id/passwordConfirmEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins"
-                android:hint="Confirm Password"
                 android:inputType="textPassword" />
 
             <TextView

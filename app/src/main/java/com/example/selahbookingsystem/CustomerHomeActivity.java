@@ -9,44 +9,58 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
 
-public class WelcomeCustomerActivity extends AppCompatActivity {
+public class CustomerHomeActivity extends BaseActivity {
+
+    // Tell BaseActivity which bottom-nav item should be selected on this screen
+    @Override
+    protected int getBottomNavMenuItemId() {
+        return R.id.nav_home;   // middle icon = Home
+    }
 
     private AppointmentsAdapter apptAdapter;
 
     private final ActivityResultLauncher<Intent> pickProviderLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    String providerId = result.getData().getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_ID);
-                    String providerName = result.getData().getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_NAME);
-                    Toast.makeText(this, "Selected: " + providerName, Toast.LENGTH_LONG).show();
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            String providerId = result.getData()
+                                    .getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_ID);
+                            String providerName = result.getData()
+                                    .getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_NAME);
 
-                    // TODO (next step): open a "Pick date/time" screen or create a simple booking.
-                    // For now we just show a Toast. We can POST to /rest/v1/bookings when ready.
-                }
-            });
+                            Toast.makeText(this,
+                                    "Selected: " + providerName,
+                                    Toast.LENGTH_LONG
+                            ).show();
+
+                            // TODO: open "Pick date/time" screen or create a simple booking.
+                            // Later we can POST to /rest/v1/bookings here.
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_welcome_customer);
 
-        TextView emailTv = findViewById(R.id.emailText);
-        TextView phoneTv = findViewById(R.id.phoneText);
+        // This layout is your page content; BaseActivity wraps it in activity_base with the bottom nav
+        setContentView(R.layout.activity_customer_home);
+
+        TextView titleText = findViewById(R.id.titleText);
         Button   bookBtn = findViewById(R.id.bookButton);
 
         String email = getIntent().getStringExtra("email");
         if (email == null) email = "";
-        String phone = RoleStore.getPhone(this, email);
+        String name = RoleStore.getName(this, email);
 
-        emailTv.setText("Email: " + email);
-        phoneTv.setText("Phone: " + (phone.isEmpty() ? "-" : phone));
+        titleText.setText("Hey " + (name != null ? name : "Customer") + ",");
 
         // Appointments list (placeholder for now)
         RecyclerView apptRv = findViewById(R.id.appointmentsRecycler);

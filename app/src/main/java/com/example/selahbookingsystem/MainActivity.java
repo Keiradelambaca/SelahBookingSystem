@@ -96,12 +96,10 @@ public class MainActivity extends AppCompatActivity {
                         Intent next;
                         if (role == RoleStore.Role.PROVIDER) {
                             next = new Intent(this, WelcomeProviderActivity.class);
-                        } else if (role == RoleStore.Role.CUSTOMER) {
-                            next = new Intent(this, WelcomeCustomerActivity.class);
                         } else {
-                            // fallback (could also be HomeActivity)
-                            next = new Intent(this, WelcomeCustomerActivity.class);
+                            next = new Intent(this, CustomerHomeActivity.class);
                         }
+
                         next.putExtra("email", emailUsed);
                         next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(next);

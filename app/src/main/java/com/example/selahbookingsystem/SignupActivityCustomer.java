@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class SignupActivityCustomer extends AppCompatActivity {
 
     TextView validationText, backToLoginText;
-    EditText emailEditText, editTextPhone, passwordEditText, passwordConfirmEditText;
+    EditText nameEditText, emailEditText, editTextPhone, passwordEditText;
     Button signupButton;
 
     @Override
@@ -27,10 +27,10 @@ public class SignupActivityCustomer extends AppCompatActivity {
 
         validationText = findViewById(R.id.validationText);
         backToLoginText = findViewById(R.id.backToLoginText);
+        nameEditText = findViewById(R.id.nameEditText);
         emailEditText = findViewById(R.id.emailEditText);
         editTextPhone = findViewById(R.id.editTextPhone);
         passwordEditText = findViewById(R.id.passwordEditText);
-        passwordConfirmEditText = findViewById(R.id.passwordConfirmEditText);
         signupButton = findViewById(R.id.signupButton);
 
         signupButton.setOnClickListener(v -> attemptSignup());
@@ -51,14 +51,20 @@ public class SignupActivityCustomer extends AppCompatActivity {
         validationText.setText("");
         clearErrors();
 
+        String name = safeText(nameEditText);
         String email = safeText(emailEditText);
         String phone = safeText(editTextPhone);
         String password = safeText(passwordEditText);
-        String confirm = safeText(passwordConfirmEditText);
+
 
         boolean ok = true;
         StringBuilder summary = new StringBuilder();
 
+        if(name.isEmpty()) {
+            setError(nameEditText, "Enter your name");
+            append(summary, "Name is required");
+            ok = false;
+        }
         if (!isValidEmail(email)) {
             setError(emailEditText, "Enter a valid email address");
             append(summary, "Invalid email.");
@@ -74,11 +80,6 @@ public class SignupActivityCustomer extends AppCompatActivity {
             append(summary, "Weak password.");
             ok = false;
         }
-        if (!password.equals(confirm)) {
-            setError(passwordConfirmEditText, "Passwords do not match");
-            append(summary, "Passwords don't match.");
-            ok = false;
-        }
 
         if (!ok) {
             validationText.setText(summary.toString());
@@ -86,8 +87,8 @@ public class SignupActivityCustomer extends AppCompatActivity {
         }
 
         // TODO: Call Supabase sign-up here if you want real accounts now.
-        // For tomorrow's demo we'll just save role locally:
-        RoleStore.saveCustomer(this, email, phone);
+        // For demo we'll just save role locally:
+        RoleStore.saveCustomer(this, email, phone, name);
 
         // Return to Login with prefill + banner
         Intent i = new Intent(this, MainActivity.class);
@@ -99,16 +100,30 @@ public class SignupActivityCustomer extends AppCompatActivity {
     }
 
     // Helpers
-    private static String safeText(EditText et) { return et.getText() == null ? "" : et.getText().toString().trim(); }
-    private static void append(StringBuilder sb, String msg) { if (sb.length() > 0) sb.append(" "); sb.append(msg); }
-    private static void setError(EditText et, String msg) { et.setError(msg); et.requestFocus(); }
+    private static String safeText(EditText et) {
+        return et.getText() == null ? "" : et.getText().toString().trim();
+    }
+    private static void append(StringBuilder sb, String msg) {
+        if (sb.length() > 0) sb.append(" ");
+        sb.append(msg);
+    }
+    private static void setError(EditText et, String msg) {
+        et.setError(msg);
+        et.requestFocus();
+    }
     private void clearErrors() {
+        nameEditText.setError(null);
         emailEditText.setError(null);
         editTextPhone.setError(null);
         passwordEditText.setError(null);
-        passwordConfirmEditText.setError(null);
     }
-    private static boolean isValidEmail(String email) { return email.length()>0 && Patterns.EMAIL_ADDRESS.matcher(email).matches(); }
-    private static boolean isValidPhone(String phone) { return phone.length()>0 && Patterns.PHONE.matcher(phone).matches(); }
-    private static boolean isValidPassword(String pwd) { return pwd.length()>=6 && pwd.matches(".*\\d.*") && !pwd.contains(" "); }
+    private static boolean isValidEmail(String email) {
+        return email.length()>0 && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+    private static boolean isValidPhone(String phone) {
+        return phone.length()>0 && Patterns.PHONE.matcher(phone).matches();
+    }
+    private static boolean isValidPassword(String password) {
+        return password.length()>=6 && password.matches(".*\\d.*") && !password.contains(" ");
+    }
 }
