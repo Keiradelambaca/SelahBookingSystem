@@ -48,7 +48,7 @@
 
         <!-- Welcome opening page: Customer (uses activity_welcome_customer.xml) -->
         <activity
-            android:name=".WelcomeCustomerActivity"
+            android:name=".CustomerHomeActivity"
             android:exported="false"/>
 
         <!-- Welcome opening page: Provider (uses activity_welcome_provider.xml) -->
@@ -58,6 +58,12 @@
 
         <!-- User book appointment/choose a SP -->
         <activity android:name=".SelectProviderActivity" />
+
+        <activity android:name=".CustomerProfileActivity" />
+        <activity android:name=".CustomerBookingActivity" />
+        <activity android:name=".CustomerExploreActivity" />
+        <activity android:name=".CustomerMessagesActivity" />
+
 
         <!-- Preloaded fonts -->
         <meta-data
