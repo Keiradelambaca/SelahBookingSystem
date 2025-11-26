@@ -1,6 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/signaturePink">
+
+    <!-- MAIN SCROLL CONTAINER -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/profileScroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="96dp">
+
+            <!-- PROFILE CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/profileCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#F8F8F8"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="5dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/profileImage"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:layout_marginRight="15dp"
+                            android:padding="2dp"
+                            android:src="@drawable/profile_icon"
+                            android:scaleType="centerCrop"
+                            android:contentDescription="@string/profile_picture"
+                            app:strokeColor="@color/accentPink"
+                            app:strokeWidth="3dp"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Selah.CircleImage" />
+
+                        <TextView
+                            android:id="@+id/titleText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins"
+                            android:text="Your Profile,"
+                            android:textSize="20sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="5dp">
+
+                        <EditText
+                            android:id="@+id/EditName"
+                            android:hint="Name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/poppins"
+                            android:textSize="16dp"
+                            android:layout_marginEnd="10dp"/>
+
+                        <Button
+                            android:id="@+id/changeButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/buttonGreen"
+                            android:fontFamily="@font/poppins"
+                            android:text="Change"
+                            android:textColor="#FFFFFF"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/UidText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="User ID"
+                        android:textSize="16dp"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:id="@+id/DOBText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="Date of Birth"
+                        android:textSize="16dp"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:id="@+id/EmailText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="Email"
+                        android:textSize="16dp"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:id="@+id/PhoneNumberText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="Phone Number"
+                        android:textSize="16dp"
+                        android:layout_gravity="left"/>
+
+                    <TextView
+                        android:id="@+id/PasswordText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/poppins"
+                        android:text="Password"
+                        android:textSize="16dp"
+                        android:layout_gravity="left"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- PAYMENT DETAILS CARD  -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/paymentDetailsCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#F8F8F8"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- HEADER ROW: TITLE + ADD CARD BUTTON -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:id="@+id/paymentTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/poppins"
+                            android:text="Saved Cards"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/addCardButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/buttonPurple"
+                            android:text="Add a Card"
+                            android:textColor="#FFFFFF"
+                            android:fontFamily="@font/poppins" />
+                    </LinearLayout>
+
+                    <!-- RECYCLER FOR SAVED CARDS - DYNAMIC HEIGHT -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/cardsRecycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- LOGOUT BUTTON AT BOTTOM OF SCROLL CONTENT -->
+            <Button
+                android:id="@+id/logoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:backgroundTint="@color/buttonPurple"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/poppins"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

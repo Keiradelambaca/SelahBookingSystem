@@ -39,7 +39,7 @@ public class SignupActivity1 extends AppCompatActivity {
         });
 
         backToLoginText.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SignupActivity1.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         });
 
