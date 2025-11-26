@@ -7,11 +7,17 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface GoTrueService {
-    @Headers("Content-Type: application/json")
-    @POST("auth/v1/signup")
-    Call<SignUpRes> signUp(@Body SignUpReq body);
 
-    @Headers("Content-Type: application/json")
+    // existing signIn method (leave as it is)
+    @Headers({"Content-Type: application/json"})
     @POST("auth/v1/token")
-    Call<Session> signIn(@Query("grant_type") String grantType, @Body SignInReq body);
+    Call<Session> signIn(
+            @Query("grant_type") String grant,
+            @Body SignInReq body
+    );
+
+    // NEW: sign-up for creating accounts
+    @Headers({"Content-Type: application/json"})
+    @POST("auth/v1/signup")
+    Call<SignUpResponse> signUp(@Body SignUpReq body);
 }

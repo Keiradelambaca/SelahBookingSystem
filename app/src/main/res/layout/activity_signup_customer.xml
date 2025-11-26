@@ -6,8 +6,7 @@
     android:id="@+id/main"
     android:background="@color/signaturePink"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/Logo"
@@ -75,6 +74,16 @@
                 android:layout_marginBottom="12dp"
                 android:fontFamily="@font/poppins"
                 android:hint="Phone Number"/>
+
+            <EditText
+                android:id="@+id/editTextDob"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/poppins"
+                android:hint="Date of Birth (YYYY-MM-DD)"
+                android:inputType="date" />
+
 
             <EditText
                 android:id="@+id/passwordEditText"

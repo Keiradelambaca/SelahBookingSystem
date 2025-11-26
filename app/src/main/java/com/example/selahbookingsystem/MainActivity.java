@@ -1,6 +1,7 @@
 package com.example.selahbookingsystem;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Button;
@@ -88,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
                     // Save JWT for future requests
                     TokenStore.save(MainActivity.this, r.body().accessToken);
 
+                    // --- Save the Supabase authenticated user ID ---
+                    String supabaseUserId = r.body().user.id;
+
+                    SharedPreferences prefs = getSharedPreferences("selah_auth", MODE_PRIVATE);
+                    prefs.edit()
+                            .putString("auth_user_id", supabaseUserId)
+                            .apply();
+
+
                     // >>> Route to correct welcome screen based on saved role <<<
                     runOnUiThread(() -> {
                         String emailUsed = email; // whatever variable you validated against
@@ -100,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                             next = new Intent(this, CustomerHomeActivity.class);
                         }
 
+                        next.putExtra("EXTRA_USER_ID", supabaseUserId);
                         next.putExtra("email", emailUsed);
                         next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(next);
