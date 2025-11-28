@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class SignupActivity1 extends AppCompatActivity {
 
+    public static final String EXTRA_ROLE = "EXTRA_ROLE";
     TextView backToLoginText;
     Button customerButton, serviceProviderButton;
 
@@ -30,11 +31,13 @@ public class SignupActivity1 extends AppCompatActivity {
 
         customerButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, com.example.selahbookingsystem.SignupActivityCustomer.class);
+            intent.putExtra(EXTRA_ROLE, "client");
             startActivity(intent);
         });
 
         serviceProviderButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, com.example.selahbookingsystem.SignupActivityServiceProvider1.class);
+            intent.putExtra(EXTRA_ROLE, "provider");
             startActivity(intent);
         });
 
