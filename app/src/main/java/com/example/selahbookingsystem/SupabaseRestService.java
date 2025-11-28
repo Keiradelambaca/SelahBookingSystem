@@ -111,16 +111,17 @@ public interface SupabaseRestService {
     }
 
     // Full profile row from public.profiles
-    class ProfileDto {
+    public static class ProfileDto {
         public String id;
-        public String full_name;
         public String email;
+        public String phone;
         public String role;
-        public String created_at;
-
-        public String phone;   // new column
-        public String dob;     // new column (Supabase date -> JSON string)
+        public String full_name;      // for customers
+        public String dob;            // for customers
+        public String business_name;  // for providers
+        public String eircode;        // if you add it
     }
+
 
     // Body for updating only the name
     class ProfileUpdateBody {

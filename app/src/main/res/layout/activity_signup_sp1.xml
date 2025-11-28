@@ -69,6 +69,15 @@
                 android:hint="Phone Number"/>
 
             <EditText
+                android:id="@+id/businessNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/poppins"
+                android:hint="Business Name"
+                android:inputType="textPersonName" />
+
+            <EditText
                 android:id="@+id/passwordEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -77,22 +86,16 @@
                 android:hint="@string/password"
                 android:inputType="textPassword" />
 
-            <EditText
-                android:id="@+id/passwordConfirmEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:fontFamily="@font/poppins"
-                android:hint="Confirm Password"
-                android:inputType="textPassword" />
+            <!-- REMOVED passwordConfirmEditText -->
 
             <EditText
                 android:id="@+id/eircodeEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:fontFamily="@font/poppins"
                 android:hint="Eircode"
-                android:inputType="textPassword" />
+                android:inputType="textCapCharacters" />
 
             <TextView
                 android:id="@+id/validationText"

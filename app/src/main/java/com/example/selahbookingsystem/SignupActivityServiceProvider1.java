@@ -23,8 +23,8 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
     private static final String EXTRA_PREFILL_EMAIL = "prefill_email";
 
     private TextView validationText, backToLoginText;
-    private EditText emailEditText, editTextPhone, passwordEditText,
-            passwordConfirmEditText, eircodeEditText;
+    private EditText emailEditText, editTextPhone, businessNameEditText,
+            passwordEditText, eircodeEditText;
     private Button signupButton;
 
     @Override
@@ -33,17 +33,16 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup_sp1);
 
-        // Bind views
-        validationText         = findViewById(R.id.validationText);
-        backToLoginText        = findViewById(R.id.backToLoginText);
-        emailEditText          = findViewById(R.id.emailEditText);
-        editTextPhone          = findViewById(R.id.editTextPhone);
-        passwordEditText       = findViewById(R.id.passwordEditText);
-        passwordConfirmEditText= findViewById(R.id.passwordConfirmEditText);
-        eircodeEditText        = findViewById(R.id.eircodeEditText);
-        signupButton           = findViewById(R.id.signupButton);
+        // Bind views (updated to include businessName, no confirm password)
+        validationText       = findViewById(R.id.validationText);
+        backToLoginText      = findViewById(R.id.backToLoginText);
+        emailEditText        = findViewById(R.id.emailEditText);
+        editTextPhone        = findViewById(R.id.editTextPhone);
+        businessNameEditText = findViewById(R.id.businessNameEditText);
+        passwordEditText     = findViewById(R.id.passwordEditText);
+        eircodeEditText      = findViewById(R.id.eircodeEditText);
+        signupButton         = findViewById(R.id.signupButton);
 
-        // Actions
         signupButton.setOnClickListener(v -> attemptSignup());
 
         backToLoginText.setOnClickListener(v -> {
@@ -51,7 +50,6 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
             finish();
         });
 
-        // Edge-to-edge insets padding
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (view, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
@@ -63,11 +61,11 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         validationText.setText("");
         clearErrors();
 
-        String email    = safeText(emailEditText);
-        String phone    = safeText(editTextPhone);
-        String password = safeText(passwordEditText);
-        String confirm  = safeText(passwordConfirmEditText);
-        String eircode  = safeText(eircodeEditText).toUpperCase();
+        String email        = safeText(emailEditText);
+        String phone        = safeText(editTextPhone);
+        String businessName = safeText(businessNameEditText);
+        String password     = safeText(passwordEditText);
+        String eircode      = safeText(eircodeEditText).toUpperCase();
 
         boolean ok = true;
         StringBuilder summary = new StringBuilder();
@@ -84,16 +82,16 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
             append(summary, "Invalid phone number.");
             ok = false;
         }
+        // Business name
+        if (businessName.isEmpty()) {
+            setError(businessNameEditText, "Enter your business name");
+            append(summary, "Business name required.");
+            ok = false;
+        }
         // Password strength
         if (!isValidPassword(password)) {
             setError(passwordEditText, "Min 6 chars, include a number, no spaces");
             append(summary, "Weak password.");
-            ok = false;
-        }
-        // Confirm password
-        if (!password.equals(confirm)) {
-            setError(passwordConfirmEditText, "Passwords do not match");
-            append(summary, "Passwords don't match.");
             ok = false;
         }
         // Eircode format
@@ -108,7 +106,6 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
             return;
         }
 
-        // ---- Supabase AUTH sign-up ----
         validationText.setText("Creating provider account...");
         signupButton.setEnabled(false);
 
@@ -131,9 +128,8 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
                     return;
                 }
 
-                // Auth user created, now insert provider profile
                 String userId = resp.body().id;
-                insertProviderProfile(userId, email, phone, eircode);
+                insertProviderProfile(userId, email, phone, eircode, businessName);
             }
 
             @Override
@@ -144,16 +140,22 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         });
     }
 
-    private void insertProviderProfile(String userId, String email,
-                                       String phone, String eircode) {
+    private void insertProviderProfile(String userId,
+                                       String email,
+                                       String phone,
+                                       String eircode,
+                                       String businessName) {
 
         SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
 
         SupabaseRestService.ProfileDto body = new SupabaseRestService.ProfileDto();
-        body.id = userId;
-        body.email = email;
-        body.phone = phone;
-        body.role = "provider";   // <--- important
+        body.id            = userId;
+        body.email         = email;
+        body.phone         = phone;
+        body.role          = "provider";
+        body.business_name = businessName;
+        // If your table also stores eircode, add:
+        // body.eircode = eircode;
 
         api.insertProfile(body).enqueue(new Callback<Void>() {
             @Override
@@ -165,11 +167,10 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
                     return;
                 }
 
-                // Keep your local RoleStore for now (phone + eircode)
+                // Local RoleStore
                 RoleStore.saveProvider(SignupActivityServiceProvider1.this,
                         email, phone, eircode);
 
-                // Go back to login with email prefilled
                 Intent i = new Intent(SignupActivityServiceProvider1.this, MainActivity.class);
                 i.putExtra(EXTRA_FROM_SIGNUP, true);
                 i.putExtra(EXTRA_PREFILL_EMAIL, email);
@@ -186,7 +187,7 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         });
     }
 
-    // ----- Validation helpers -----
+    // Validation helpers
     private static boolean isValidEmail(String email) {
         return email.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
@@ -203,7 +204,6 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         return code.matches("^[A-Za-z]\\d{2}\\s?[A-Za-z0-9]{4}$");
     }
 
-    // ----- UI helpers -----
     private static String safeText(EditText et) {
         return et.getText() == null ? "" : et.getText().toString().trim();
     }
@@ -221,8 +221,8 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
     private void clearErrors() {
         emailEditText.setError(null);
         editTextPhone.setError(null);
+        businessNameEditText.setError(null);
         passwordEditText.setError(null);
-        passwordConfirmEditText.setError(null);
         eircodeEditText.setError(null);
     }
 }
