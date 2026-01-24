@@ -9,4 +9,5 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="profile_picture" />
+    <string name="google_maps_key">AIzaSyCDY4-CiPlh2P4F0AdqSy5ogFuHIwxd1Dc</string>
 </resources>

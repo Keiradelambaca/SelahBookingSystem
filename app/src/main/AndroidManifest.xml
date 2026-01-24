@@ -4,6 +4,7 @@
 
     <!-- Internet permission required for Supabase API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +19,7 @@
 
         <!-- Launcher / Login -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,41 +29,60 @@
 
         <!-- Home (post-login) -->
         <activity
-            android:name=".HomeActivity"
+            android:name=".ui.auth.HomeActivity"
             android:exported="false" />
 
         <!-- Signup flow: screen 1 (chooser?) -->
         <activity
-            android:name=".SignupActivity1"
+            android:name=".ui.auth.SignupActivity1"
             android:exported="false" />
 
         <!-- Signup: Customer -->
         <activity
-            android:name=".SignupActivityCustomer"
+            android:name=".ui.auth.SignupActivityCustomer"
             android:exported="false" />
 
         <!-- Signup: Service Provider (uses activity_signup_sp1.xml) -->
         <activity
-            android:name=".SignupActivityServiceProvider1"
+            android:name=".ui.auth.SignupActivityServiceProvider1"
             android:exported="false" />
 
         <!-- Welcome opening page: Customer (uses activity_welcome_customer.xml) -->
         <activity
-            android:name=".CustomerHomeActivity"
+            android:name=".ui.customer.CustomerHomeActivity"
             android:exported="false"/>
 
         <!-- Welcome opening page: Provider (uses activity_welcome_provider.xml) -->
         <activity
-            android:name=".WelcomeProviderActivity"
+            android:name=".ui.provider.WelcomeProviderActivity"
             android:exported="false"/>
 
         <!-- User book appointment/choose a SP -->
-        <activity android:name=".SelectProviderActivity" />
+        <activity android:name=".ui.customer.SelectProviderActivity" />
 
-        <activity android:name=".CustomerProfileActivity" />
-        <activity android:name=".CustomerBookingActivity" />
-        <activity android:name=".CustomerExploreActivity" />
-        <activity android:name=".CustomerMessagesActivity" />
+        <activity android:name=".ui.customer.CustomerProfileActivity" />
+        <activity android:name=".ui.customer.CustomerExploreActivity" />
+
+        <activity android:name=".ui.customer.CustomerMessagesActivity" />
+        <activity android:name=".ui.customer.ChatActivity"/>
+
+        <activity
+            android:name=".ui.customer.CustomerAppointmentActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.customer.CustomerAppointmentDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.customer.CustomerAppointmentMapActivity"
+            android:exported="false" />
+
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
 
 
         <!-- Preloaded fonts -->
