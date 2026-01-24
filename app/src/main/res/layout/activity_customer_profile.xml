@@ -62,7 +62,7 @@
                             android:contentDescription="@string/profile_picture"
                             app:strokeColor="@color/accentPink"
                             app:strokeWidth="3dp"
-                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Selah.CircleImage" />
+                            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Selah.Circle" />
 
                         <TextView
                             android:id="@+id/titleText"
