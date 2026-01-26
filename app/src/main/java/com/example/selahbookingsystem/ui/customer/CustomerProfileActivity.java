@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
@@ -156,13 +157,25 @@ public class CustomerProfileActivity extends BaseActivity {
 
         // Logout Button
         logoutButton.setOnClickListener(v -> {
-            SharedPreferences prefs = getSharedPreferences("selah_auth", MODE_PRIVATE);
-            prefs.edit().clear().apply();
+            // 1) Clear supabase tokens (this is the important one)
+            TokenStore.clear(CustomerProfileActivity.this);
 
+            // 2) Clear in-memory session
+            com.example.selahbookingsystem.data.session.SessionManager.clear();
+
+            // 3) Clear your "selah_auth" prefs (auth_user_id etc)
+            getSharedPreferences("selah_auth", MODE_PRIVATE)
+                    .edit()
+                    .clear()
+                    .apply();
+
+            // 4) Go back to login and clear backstack
             Intent intent = new Intent(CustomerProfileActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
+
     }
 
     private void showImageSourceDialog() {

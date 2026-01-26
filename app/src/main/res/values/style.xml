@@ -6,4 +6,12 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="ToolbarTitleBold">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>   <!-- optional -->
+        <item name="android:textColor">@android:color/black</item>
+        <item name="fontFamily">@font/poppins_bold</item> <!-- optional if you use Poppins -->
+    </style>
+
+
 </resources>

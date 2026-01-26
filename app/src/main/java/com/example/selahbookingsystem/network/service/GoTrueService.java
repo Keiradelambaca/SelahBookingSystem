@@ -1,5 +1,6 @@
 package com.example.selahbookingsystem.network.service;
 
+import com.example.selahbookingsystem.data.model.RefreshReq;
 import com.example.selahbookingsystem.data.model.SignInReq;
 import com.example.selahbookingsystem.data.model.SignUpReq;
 import com.example.selahbookingsystem.data.model.SignUpResponse;
@@ -25,4 +26,8 @@ public interface GoTrueService {
     @Headers({"Content-Type: application/json"})
     @POST("auth/v1/signup")
     Call<SignUpResponse> signUp(@Body SignUpReq body);
+
+    @POST("auth/v1/token?grant_type=refresh_token")
+    Call<Session> refreshToken(@Body RefreshReq body);
+
 }
