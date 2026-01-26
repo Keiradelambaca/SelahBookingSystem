@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.Selah">
+        android:theme="@style/Theme.Selah"
+        android:name=".SelahApp">
 
         <!-- Launcher / Login -->
         <activity
@@ -61,7 +62,13 @@
         <activity android:name=".ui.customer.SelectProviderActivity" />
 
         <activity android:name=".ui.customer.CustomerProfileActivity" />
+
+
         <activity android:name=".ui.customer.CustomerExploreActivity" />
+        <activity
+            android:name=".ui.customer.CustomerLikedLooksActivity"
+            android:exported="false"/>
+
 
         <activity android:name=".ui.customer.CustomerMessagesActivity" />
         <activity android:name=".ui.customer.ChatActivity"/>

@@ -14,6 +14,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.selahbookingsystem.data.model.RefreshReq;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.ui.customer.CustomerHomeActivity;
 import com.example.selahbookingsystem.network.service.GoTrueService;
@@ -35,6 +36,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Auto-login: if we have a stored session, skip login screen
+        if (TokenStore.hasSession(this)) {
+            autoRouteFromStoredSession();
+            return;
+        }
 
         emailEditText   = findViewById(R.id.emailEditText);
         passwordEditText= findViewById(R.id.passwordEditText);
@@ -96,15 +103,29 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Save JWT for future requests
-                    TokenStore.save(MainActivity.this, r.body().accessToken);
+                    Session s = r.body();
 
-                    // --- Save the Supabase authenticated user ID ---
+                    // Save tokens + expiry + userId + last email for auto-login
+                    TokenStore.save(
+                            MainActivity.this,
+                            s.accessToken,
+                            s.refreshToken,
+                            s.expiresIn,
+                            (s.user != null ? s.user.id : null),
+                            email
+                    );
+
+                    // Optional: keep SessionManager in memory too
+                    com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
+
+
+                    // --- Save the Supabase authenticated user ID + last email ---
                     String supabaseUserId = r.body().user.id;
 
                     SharedPreferences prefs = getSharedPreferences("selah_auth", MODE_PRIVATE);
                     prefs.edit()
                             .putString("auth_user_id", supabaseUserId)
+                            .putString("last_email", email)   // 👈 ADD THIS LINE
                             .apply();
 
 
@@ -145,4 +166,88 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void autoRouteFromStoredSession() {
+
+        // If access token is still valid, route immediately.
+        if (TokenStore.isAccessTokenValid(this)) {
+            routeToCorrectHome();
+            return;
+        }
+
+        // Otherwise refresh token in background
+        validationText.setText("Restoring session...");
+        loginButton.setEnabled(false);
+
+        new Thread(() -> {
+            try {
+                GoTrueService auth = ApiClient.get().create(GoTrueService.class);
+
+                // IMPORTANT: you need a refresh endpoint in GoTrueService (next section)
+                String refreshToken = TokenStore.getRefreshToken(this);
+                retrofit2.Response<Session> rr =
+                        auth.refreshToken(new RefreshReq(refreshToken)).execute();
+
+                if (!rr.isSuccessful() || rr.body() == null || rr.body().accessToken == null) {
+                    runOnUiThread(() -> {
+                        // Refresh failed -> go back to normal login
+                        TokenStore.clear(this);
+                        validationText.setText("");
+                        loginButton.setEnabled(true);
+                    });
+                    return;
+                }
+
+                Session s = rr.body();
+
+                // Save new session
+                String email = TokenStore.getLastEmail(this);
+                TokenStore.save(
+                        this,
+                        s.accessToken,
+                        s.refreshToken,
+                        s.expiresIn,
+                        (s.user != null ? s.user.id : null),
+                        email
+                );
+
+                com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
+
+                runOnUiThread(this::routeToCorrectHome);
+
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    TokenStore.clear(this);
+                    validationText.setText("");
+                    loginButton.setEnabled(true);
+                });
+            }
+        }).start();
+    }
+
+    private void routeToCorrectHome() {
+        String emailUsed = TokenStore.getLastEmail(this);
+        if (emailUsed == null) emailUsed = "";
+
+        RoleStore.Role role = RoleStore.getRole(this, emailUsed);
+
+        Intent next;
+        if (role == RoleStore.Role.PROVIDER) {
+            // Use your real provider landing screen
+            next = new Intent(this, WelcomeProviderActivity.class);
+            // If you have ServiceProviderHomeActivity, swap it in here.
+            // next = new Intent(this, ServiceProviderHomeActivity.class);
+        } else {
+            next = new Intent(this, CustomerHomeActivity.class);
+        }
+
+        next.putExtra("EXTRA_USER_ID", TokenStore.getUserId(this));
+        next.putExtra("email", emailUsed);
+
+        next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(next);
+        finish();
+    }
+
+
 }
