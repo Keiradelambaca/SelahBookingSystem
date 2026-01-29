@@ -37,17 +37,17 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Auto-login: if we have a stored session, skip login screen
-        if (TokenStore.hasSession(this)) {
-            autoRouteFromStoredSession();
-            return;
-        }
-
         emailEditText   = findViewById(R.id.emailEditText);
         passwordEditText= findViewById(R.id.passwordEditText);
         loginButton     = findViewById(R.id.loginButton);
         validationText  = findViewById(R.id.validationText);
         signupText      = findViewById(R.id.signupText);
+
+        // Auto-login: if we have a stored session, skip login screen
+        if (TokenStore.hasSession(this)) {
+            autoRouteFromStoredSession();
+            return;
+        }
 
         // If coming back from sign-up: prefill and prompt to log in
         boolean fromSignup = getIntent().getBooleanExtra("from_signup", false);

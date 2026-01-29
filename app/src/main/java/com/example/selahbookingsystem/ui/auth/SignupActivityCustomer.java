@@ -26,6 +26,7 @@ import com.example.selahbookingsystem.data.model.SignUpResponse;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
 
 import java.util.Calendar;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -193,13 +194,19 @@ public class SignupActivityCustomer extends AppCompatActivity {
         body.dob       = dob;
         body.role      = userRole != null ? userRole : "client";
 
-        api.insertProfile(body).enqueue(new Callback<Void>() {
+        api.insertProfile(body).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<List<SupabaseRestService.ProfileDto>> call,
+                                   Response<List<SupabaseRestService.ProfileDto>> response) {
+
                 signupBtn.setEnabled(true);
 
                 if (!response.isSuccessful()) {
-                    validationText.setText("Error saving profile.");
+                    String msg = "Error saving profile.";
+                    try {
+                        if (response.errorBody() != null) msg = response.errorBody().string();
+                    } catch (Exception ignored) {}
+                    validationText.setText(msg);
                     return;
                 }
 
@@ -220,10 +227,13 @@ public class SignupActivityCustomer extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<List<SupabaseRestService.ProfileDto>> call, Throwable t) {
                 signupBtn.setEnabled(true);
                 validationText.setText("Profile error: " + t.getMessage());
             }
         });
     }
+
+
+
 }
