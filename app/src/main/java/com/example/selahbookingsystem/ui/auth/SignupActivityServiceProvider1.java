@@ -6,6 +6,7 @@ import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,8 @@ import com.example.selahbookingsystem.data.store.RoleStore;
 import com.example.selahbookingsystem.data.model.SignUpReq;
 import com.example.selahbookingsystem.data.model.SignUpResponse;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -154,6 +157,8 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
                                        String eircode,
                                        String businessName) {
 
+        validationText.setText("Saving provider profile...");
+
         SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
 
         SupabaseRestService.ProfileDto body = new SupabaseRestService.ProfileDto();
@@ -165,19 +170,29 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         // If your table also stores eircode, add:
         // body.eircode = eircode;
 
-        api.insertProfile(body).enqueue(new Callback<Void>() {
+        api.insertProfile(body).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<List<SupabaseRestService.ProfileDto>> call,
+                                   Response<List<SupabaseRestService.ProfileDto>> response) {
+
                 signupButton.setEnabled(true);
 
                 if (!response.isSuccessful()) {
-                    validationText.setText("Error saving provider profile.");
+                    String msg = "Error saving provider profile.";
+                    try {
+                        if (response.errorBody() != null) msg = response.errorBody().string();
+                    } catch (Exception ignored) {}
+                    validationText.setText(msg);
                     return;
                 }
 
                 // Local RoleStore
                 RoleStore.saveProvider(SignupActivityServiceProvider1.this,
                         email, phone, eircode);
+
+                Toast.makeText(SignupActivityServiceProvider1.this,
+                        "Provider account created. Please log in.",
+                        Toast.LENGTH_LONG).show();
 
                 Intent i = new Intent(SignupActivityServiceProvider1.this, MainActivity.class);
                 i.putExtra(EXTRA_FROM_SIGNUP, true);
@@ -188,12 +203,13 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<List<SupabaseRestService.ProfileDto>> call, Throwable t) {
                 signupButton.setEnabled(true);
                 validationText.setText("Provider profile error: " + t.getMessage());
             }
         });
     }
+
 
     // Validation helpers
     private static boolean isValidEmail(String email) {

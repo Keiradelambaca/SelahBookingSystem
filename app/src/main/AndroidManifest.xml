@@ -91,11 +91,18 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <activity android:name=".ui.customer.BookingPhotosActivity" />
+        <activity android:name=".ui.customer.BookingBubblesActivity" />
+        <activity android:name=".ui.customer.PickTimeslotActivity" />
+        <activity android:name=".ui.customer.ConfirmBookingActivity" />
+
+
 
         <!-- Preloaded fonts -->
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>

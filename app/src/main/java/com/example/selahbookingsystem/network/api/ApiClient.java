@@ -12,6 +12,8 @@ import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import com.example.selahbookingsystem.network.api.ServicesApi;
+
 
 public class ApiClient {
 
@@ -74,4 +76,14 @@ public class ApiClient {
         }
         return retrofit;
     }
+
+    public static BookingsApi bookings() {
+        return get().create(BookingsApi.class);
+    }
+
+    public static ServicesApi services() {
+        return get().create(ServicesApi.class);
+    }
+
+
 }

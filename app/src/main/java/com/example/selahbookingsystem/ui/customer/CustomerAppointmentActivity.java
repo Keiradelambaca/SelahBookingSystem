@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.adapter.CustomerAppointment;
 import com.example.selahbookingsystem.adapter.CustomerAppointmentsAdapter;
+import com.example.selahbookingsystem.data.store.TokenStore;
+import com.example.selahbookingsystem.network.api.ApiClient;
+import com.example.selahbookingsystem.network.service.SupabaseRestService;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -70,21 +73,53 @@ public class CustomerAppointmentActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        pruneSortAndRender();
+        loadAppointments();
     }
 
-    /**
-     * Load appointments from backend (Supabase/Firebase later).
-     * Currently mocked so UI can be built safely.
-     */
     private void loadAppointments() {
-        List<CustomerAppointment> all = fetchAppointmentsMock();
 
-        upcomingAppointments.clear();
-        upcomingAppointments.addAll(all);
+        String clientId = TokenStore.getUserId(this);
+        if (clientId == null || clientId.isEmpty()) {
+            upcomingAppointments.clear();
+            pruneSortAndRender();
+            return;
+        }
 
-        pruneSortAndRender();
+        SupabaseRestService rest = ApiClient.get().create(SupabaseRestService.class);
+
+        String nowIso = Instant.now().toString();
+
+        rest.listUpcomingBookingsForClient(
+                "eq." + clientId,
+                "gte." + nowIso,
+                "start_time.asc",
+                "id,provider_id,provider_name,start_time,end_time,duration_mins,details_json,inspo_photo_url,current_photo_url,staus,created_at"
+        ).enqueue(new retrofit2.Callback<List<SupabaseRestService.BookingDto>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<SupabaseRestService.BookingDto>> call,
+                                   retrofit2.Response<List<SupabaseRestService.BookingDto>> resp) {
+                if (!resp.isSuccessful() || resp.body() == null) {
+                    upcomingAppointments.clear();
+                    pruneSortAndRender();
+                    return;
+                }
+
+                upcomingAppointments.clear();
+                for (SupabaseRestService.BookingDto b : resp.body()) {
+                    upcomingAppointments.add(mapBookingToAppointment(b));
+                }
+
+                pruneSortAndRender();
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<SupabaseRestService.BookingDto>> call, Throwable t) {
+                // Optional: show a toast
+                pruneSortAndRender();
+            }
+        });
     }
+
 
     /**
      * Removes past appointments and sorts upcoming by nearest date.
@@ -140,6 +175,37 @@ public class CustomerAppointmentActivity extends BaseActivity {
                 return "";
         }
     }
+
+    private CustomerAppointment mapBookingToAppointment(SupabaseRestService.BookingDto b) {
+        // Convert ISO start_time to Instant
+        Instant start = null;
+        try { start = Instant.parse(b.start_time); } catch (Exception ignored) {}
+
+        // Create your CustomerAppointment
+        CustomerAppointment a = new CustomerAppointment();
+
+        a.setId(b.id);
+        a.setProviderName(b.provider_name != null ? b.provider_name : "Provider");
+        a.setAppointmentStart(start);
+
+        // Use duration or end_time if your model supports it
+        a.setDurationMins(b.duration_mins != null ? b.duration_mins : 60);
+
+        // If you have a title field like “Full set • Long • French”
+        a.setServiceTitle("Nail Appointment");
+
+        // Optional: you can set banner to inspo image
+        a.setBannerUrl(b.inspo_photo_url);
+
+        // Optional placeholders if your detail screen expects these
+        a.setLocationArea("Near you");
+
+        // Payment status can stay mocked for now
+        // a.setPaymentStatus(...)
+
+        return a;
+    }
+
 
 
     @Override
