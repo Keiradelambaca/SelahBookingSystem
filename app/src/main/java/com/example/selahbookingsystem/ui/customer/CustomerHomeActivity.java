@@ -2,163 +2,206 @@ package com.example.selahbookingsystem.ui.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.selahbookingsystem.R;
-import com.example.selahbookingsystem.adapter.AppointmentsAdapter;
-import com.example.selahbookingsystem.data.store.RoleStore;
-import com.example.selahbookingsystem.data.store.TokenStore;
+import com.example.selahbookingsystem.adapter.CustomerAppointment;
+import com.example.selahbookingsystem.adapter.CustomerAppointmentsAdapter;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
+import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.ui.base.BaseActivity;
+import com.example.selahbookingsystem.data.store.TokenStore;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CustomerHomeActivity extends com.example.selahbookingsystem.ui.base.BaseActivity {
+public class CustomerHomeActivity extends BaseActivity {
 
-    @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_home;
-    }
+    private TextView titleText;
+    private Button bookButton;
 
-    private AppointmentsAdapter apptAdapter;
-    private SupabaseRestService rest;
+    private RecyclerView appointmentsRecycler;
 
-    private final ActivityResultLauncher<Intent> pickProviderLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result -> {
-                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                            String providerId = result.getData()
-                                    .getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_ID);
-                            String providerName = result.getData()
-                                    .getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_NAME);
-
-                            if (providerId == null || providerId.isEmpty()) {
-                                Toast.makeText(this, "No provider selected", Toast.LENGTH_LONG).show();
-                                return;
-                            }
-
-                            Intent next = new Intent(this, BookingPhotosActivity.class);
-                            next.putExtra(BookingPhotosActivity.EXTRA_PROVIDER_ID, providerId);
-                            next.putExtra(BookingPhotosActivity.EXTRA_PROVIDER_NAME, providerName);
-                            startActivity(next);
-                        }
-                    }
-            );
+    private final List<CustomerAppointment> upcoming = new ArrayList<>();
+    private CustomerAppointmentsAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-
         setContentView(R.layout.activity_customer_home);
 
-        rest = ApiClient.get().create(SupabaseRestService.class);
+        titleText = findViewById(R.id.titleText);
+        bookButton = findViewById(R.id.bookButton);
+        appointmentsRecycler = findViewById(R.id.appointmentsRecycler);
 
-        TextView titleText = findViewById(R.id.titleText);
-        Button bookBtn = findViewById(R.id.bookButton);
+        // Optional: personalize greeting if name is elsewhere
+        titleText.setText("Hey Customer,");
 
-        String email = getIntent().getStringExtra("email");
-        if (email == null) email = "";
-        String name = RoleStore.getName(this, email);
-        titleText.setText("Hey " + (name != null ? name : "Customer") + ",");
+        // Recycler setup
+        appointmentsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new CustomerAppointmentsAdapter(this, upcoming, appt -> {
+            Intent i = new Intent(this, CustomerAppointmentDetailActivity.class);
+            i.putExtra(CustomerAppointmentDetailActivity.EXTRA_BOOKING_ID, appt.getId());
+            startActivity(i);
+        });
+        appointmentsRecycler.setAdapter(adapter);
 
-        RecyclerView apptRv = findViewById(R.id.appointmentsRecycler);
-        apptRv.setLayoutManager(new LinearLayoutManager(this));
-        apptAdapter = new AppointmentsAdapter();
-        apptRv.setAdapter(apptAdapter);
-
-        bookBtn.setOnClickListener(v -> {
+        // Book button -> booking flow screen
+        bookButton.setOnClickListener(v -> {
             Intent i = new Intent(this, SelectProviderActivity.class);
             pickProviderLauncher.launch(i);
         });
 
-        // Load real upcoming bookings (preview)
-        loadUpcomingForHome();
+
+        loadUpcomingPreview();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadUpcomingForHome(); // refresh when returning from booking flow
+        loadUpcomingPreview();
     }
 
-    private void loadUpcomingForHome() {
-
+    private void loadUpcomingPreview() {
         String clientId = TokenStore.getUserId(this);
+
         if (clientId == null || clientId.isEmpty()) {
-            apptAdapter.submit(new ArrayList<>());
+            upcoming.clear();
+            adapter.notifyDataSetChanged();
             return;
         }
 
+        SupabaseRestService rest = ApiClient.get().create(SupabaseRestService.class);
+
         String nowIso = Instant.now().toString();
 
+        String select =
+                "id,provider_id,provider_name,start_time,end_time,duration_mins," +
+                        "details_json,inspo_photo_url,current_photo_url,status,created_at";
+
+        // show next 3 on home
         rest.listUpcomingBookingsForClientLimited(
                 "eq." + clientId,
                 "gte." + nowIso,
                 "start_time.asc",
-                // Your table columns:
-                "id,provider_name,start_time",
+                select,
                 3
-        ).enqueue(new Callback<List<SupabaseRestService.BookingDto>>() {
+        ).enqueue(new Callback<List<BookingDto>>() {
             @Override
-            public void onResponse(Call<List<SupabaseRestService.BookingDto>> call,
-                                   Response<List<SupabaseRestService.BookingDto>> resp) {
-                if (!resp.isSuccessful() || resp.body() == null) {
-                    apptAdapter.submit(new ArrayList<>());
-                    return;
+            public void onResponse(Call<List<BookingDto>> call, Response<List<BookingDto>> resp) {
+                upcoming.clear();
+
+                if (resp.isSuccessful() && resp.body() != null) {
+                    for (BookingDto b : resp.body()) {
+                        upcoming.add(mapBookingToAppointment(b));
+                    }
                 }
 
-                List<AppointmentsAdapter.Item> items = new ArrayList<>();
-                for (SupabaseRestService.BookingDto b : resp.body()) {
-                    String provider = (b.provider_name != null && !b.provider_name.isEmpty())
-                            ? b.provider_name
-                            : "Provider";
-
-                    String when = formatPretty(b.start_time);
-
-                    items.add(new AppointmentsAdapter.Item(
-                            "Booking with " + provider,
-                            when
-                    ));
-                }
-
-                apptAdapter.submit(items);
+                pruneAndSortUpcoming();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onFailure(Call<List<SupabaseRestService.BookingDto>> call, Throwable t) {
-                apptAdapter.submit(new ArrayList<>());
+            public void onFailure(Call<List<BookingDto>> call, Throwable t) {
+                // keep list empty / show whatever last loaded
+                upcoming.clear();
+                adapter.notifyDataSetChanged();
             }
         });
     }
 
-    private String formatPretty(String iso) {
-        try {
-            Instant inst = Instant.parse(iso);
-            ZonedDateTime z = inst.atZone(ZoneId.systemDefault());
-            DateTimeFormatter f = DateTimeFormatter.ofPattern("EEE d MMM • HH:mm");
-            return z.format(f);
-        } catch (Exception e) {
-            return iso != null ? iso : "";
-        }
+    private void pruneAndSortUpcoming() {
+        Instant now = Instant.now();
+        upcoming.removeIf(a -> a.getAppointmentStart() == null || !a.getAppointmentStart().isAfter(now));
+        upcoming.sort(Comparator.comparing(CustomerAppointment::getAppointmentStart));
+    }
+
+    private CustomerAppointment mapBookingToAppointment(BookingDto b) {
+        CustomerAppointment a = new CustomerAppointment();
+
+        a.setId(b.id);
+        a.setProviderName(b.provider_name != null ? b.provider_name : "Provider");
+        a.setAppointmentStart(parseToInstant(b.start_time));
+
+        a.setDurationMins(b.duration_mins != null ? b.duration_mins : 60);
+
+        // no service title column yet
+        a.setServiceTitle("Nail Appointment");
+
+        // Use inspo image first; fallback to current photo
+        String banner =
+                (b.inspo_photo_url != null && !b.inspo_photo_url.isEmpty())
+                        ? b.inspo_photo_url
+                        : b.current_photo_url;
+
+        a.setBannerUrl(banner);
+
+        a.setLocationArea("Near you");
+
+        a.setPaymentStatus(mapPaymentStatus(b.status));
+
+        // price isn’t in booking columns yet
+        a.setPrice(0);
+
+        return a;
+    }
+
+    private CustomerAppointment.PaymentStatus mapPaymentStatus(String status) {
+        if (status == null) return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+
+        if ("paid".equalsIgnoreCase(status)) return CustomerAppointment.PaymentStatus.PAID;
+        if ("deposit_paid".equalsIgnoreCase(status)) return CustomerAppointment.PaymentStatus.DEPOSIT_PAID;
+        if ("cash".equalsIgnoreCase(status) || "pay_by_cash".equalsIgnoreCase(status))
+            return CustomerAppointment.PaymentStatus.PAY_BY_CASH;
+
+        return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+    }
+
+    private Instant parseToInstant(String iso) {
+        if (iso == null) return null;
+
+        // Handles "2026-01-29T14:30:00Z"
+        try { return Instant.parse(iso); } catch (Exception ignored) {}
+
+        // Handles "2026-01-29T14:30:00+00:00"
+        try { return OffsetDateTime.parse(iso).toInstant(); } catch (Exception ignored) {}
+
+        return null;
+    }
+
+    private final androidx.activity.result.ActivityResultLauncher<Intent> pickProviderLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() != RESULT_OK || result.getData() == null) return;
+
+                        String providerId = result.getData().getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_ID);
+                        String providerName = result.getData().getStringExtra(SelectProviderActivity.EXTRA_SELECTED_PROVIDER_NAME);
+
+                        Intent next = new Intent(this, BookingPhotosActivity.class);
+                        next.putExtra(BookingPhotosActivity.EXTRA_PROVIDER_ID, providerId);
+                        next.putExtra(BookingPhotosActivity.EXTRA_PROVIDER_NAME, providerName);
+                        startActivity(next);
+                    });
+
+
+    @Override
+    protected int getBottomNavMenuItemId() {
+        return R.id.nav_home;
     }
 }
+

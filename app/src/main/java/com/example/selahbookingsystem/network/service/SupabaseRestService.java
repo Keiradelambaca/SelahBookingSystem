@@ -2,6 +2,9 @@ package com.example.selahbookingsystem.network.service;
 
 import androidx.annotation.Nullable;
 
+import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.model.BookingCreate;
+
 import java.util.List;
 import java.util.Map;
 
@@ -55,20 +58,13 @@ public interface SupabaseRestService {
     Call<List<ProfileDto>> insertProfile(@Body ProfileDto body);
 
 
-    // =========================
-    // BOOKINGS (matches your table)
-    // Table columns (per your screenshot):
-    // id, client_id, provider_id, start_time, end_time, created_at,
-    // provider_name, current_photo_url, inspo_photo_url, staus, duration_mins, details_json
-    // =========================
-
     // POST /rest/v1/bookings
     @Headers({
             "Content-Type: application/json",
             "Prefer: return=representation"
     })
     @POST("rest/v1/bookings")
-    Call<List<BookingDto>> createBooking(@Body BookingCreate body);
+    Call<List<BookingDto>> createBooking(@Body BookingDto body);
 
     // GET upcoming bookings for a client
     // /rest/v1/bookings?client_id=eq.<uid>&start_time=gte.<iso>&order=start_time.asc&select=...
@@ -78,7 +74,8 @@ public interface SupabaseRestService {
             @Query("client_id") String clientIdEq, // "eq.<auth.uid>"
             @Query("start_time") String startGte,  // "gte.2026-01-28T00:00:00Z"
             @Query("order") String orderBy,        // "start_time.asc"
-            @Query("select") String select         // columns
+            @Query("select") String select,        // columns
+            @Query("limit") int limit
     );
 
     // Same as above but limited (Home page preview)
@@ -124,92 +121,10 @@ public interface SupabaseRestService {
         }
     }
 
-    // Booking row from public.bookings (MATCHES YOUR COLUMN NAMES)
-    class BookingDto {
-        public String id;
-        public String client_id;
-        public String provider_id;
+    @GET("rest/v1/bookings")
+    Call<List<BookingDto>> getBookingById(
+            @Query("select") String select,
+            @Query("id") String idFilter
+    );
 
-        public String start_time;     // timestamptz ISO string
-        public String end_time;       // timestamptz ISO string
-        public String created_at;
-
-        @Nullable public String provider_name;
-        @Nullable public String current_photo_url;
-        @Nullable public String inspo_photo_url;
-
-        // NOTE: your table shows "staus" (typo). If you rename the column to "status",
-        // rename this field too.
-        @Nullable public String staus;
-
-        @Nullable public Integer duration_mins;
-
-        // jsonb – Retrofit/Gson can serialize/deserialize Maps fine
-        @Nullable public Object details_json;
-    }
-
-    // Payload for creating a booking
-    class BookingCreate {
-        public String client_id;
-        public String provider_id;
-
-        public String start_time;
-        public String end_time;
-
-        @Nullable public String provider_name;
-        @Nullable public String current_photo_url;
-        @Nullable public String inspo_photo_url;
-
-        @Nullable public String staus;         // change to "status" if you fix DB column name
-        @Nullable public Integer duration_mins;
-
-        @Nullable public Object details_json;  // Map<String,String> recommended
-
-        public BookingCreate(String client_id,
-                             String provider_id,
-                             String start_time,
-                             String end_time,
-                             @Nullable String provider_name,
-                             @Nullable String current_photo_url,
-                             @Nullable String inspo_photo_url,
-                             @Nullable String staus,
-                             @Nullable Integer duration_mins,
-                             @Nullable Object details_json) {
-
-            this.client_id = client_id;
-            this.provider_id = provider_id;
-            this.start_time = start_time;
-            this.end_time = end_time;
-            this.provider_name = provider_name;
-            this.current_photo_url = current_photo_url;
-            this.inspo_photo_url = inspo_photo_url;
-            this.staus = staus;
-            this.duration_mins = duration_mins;
-            this.details_json = details_json;
-        }
-
-        // Convenience factory if you want to pass Map directly
-        public static BookingCreate of(String clientId,
-                                       String providerId,
-                                       String startIso,
-                                       String endIso,
-                                       String providerName,
-                                       int durationMins,
-                                       @Nullable Map<String, String> detailsMap,
-                                       @Nullable String currentPhotoUrl,
-                                       @Nullable String inspoPhotoUrl) {
-            return new BookingCreate(
-                    clientId,
-                    providerId,
-                    startIso,
-                    endIso,
-                    providerName,
-                    currentPhotoUrl,
-                    inspoPhotoUrl,
-                    "confirmed",
-                    durationMins,
-                    detailsMap
-            );
-        }
-    }
 }

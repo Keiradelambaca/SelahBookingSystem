@@ -8,11 +8,12 @@
     android:background="@color/signaturePink">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="363dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardBackgroundColor="#F8F8F8"
+        android:layout_margin="16dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
+        app:cardBackgroundColor="#F8F8F8"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

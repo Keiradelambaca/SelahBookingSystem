@@ -27,11 +27,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected abstract int getBottomNavMenuItemId();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void setContentView(int layoutResID) {
         View fullView = LayoutInflater.from(this).inflate(R.layout.activity_base, null);
         FrameLayout container = fullView.findViewById(R.id.baseContent);
@@ -40,67 +35,35 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         super.setContentView(fullView);
 
-        setupBottomNav(R.id.nav_messages);
+        setupBottomNav();
     }
 
-    public void setupBottomNav(int nav_messages) {
+    private void setupBottomNav() {
         bottomNav = findViewById(R.id.bottomNav);
         if (bottomNav == null) return;
 
-        // Highlight the correct item for this activity
-        int itemId = getBottomNavMenuItemId();
-        if (itemId != 0) {
-            bottomNav.setSelectedItemId(itemId);
-        }
+        // highlight correct item WITHOUT firing navigation
+        bottomNav.setOnItemSelectedListener(null);
+        bottomNav.setSelectedItemId(getBottomNavMenuItemId());
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
-            if (id == R.id.nav_home) {
-                if (!(this instanceof CustomerHomeActivity)) {
-                    startActivity(new Intent(this, CustomerHomeActivity.class));
-                    overridePendingTransition(0, 0);
-                    finish();
-                }
+            if (id == getBottomNavMenuItemId()) return true;
+            Intent intent = null;
+
+            if (id == R.id.nav_home) intent = new Intent(this, CustomerHomeActivity.class);
+            else if (id == R.id.nav_appointments) intent = new Intent(this, CustomerAppointmentActivity.class);
+            else if (id == R.id.nav_explore) intent = new Intent(this, CustomerExploreActivity.class);
+            else if (id == R.id.nav_messages) intent = new Intent(this, CustomerMessagesActivity.class);
+            else if (id == R.id.nav_profile) intent = new Intent(this, CustomerProfileActivity.class);
+
+            if (intent != null) {
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+                finish();
                 return true;
             }
-
-            if (id == R.id.nav_appointments) {
-                if (!(this instanceof CustomerAppointmentActivity)) {
-                    startActivity(new Intent(this, CustomerAppointmentActivity.class));
-                    overridePendingTransition(0,0);
-                    finish();
-                }
-                return true;
-            }
-
-            if (id == R.id.nav_profile) {
-                if (!(this instanceof CustomerProfileActivity)) {
-                    startActivity(new Intent(this, CustomerProfileActivity.class));
-                    overridePendingTransition(0,0);
-                    finish();
-                }
-                return true;
-            }
-
-            if (id == R.id.nav_explore) {
-                if (!(this instanceof CustomerExploreActivity)) {
-                    startActivity(new Intent(this, CustomerExploreActivity.class));
-                    overridePendingTransition(0,0);
-                    finish();
-                }
-                return true;
-            }
-
-            if (id == R.id.nav_messages) {
-                if (!(this instanceof CustomerMessagesActivity)) {
-                    startActivity(new Intent(this, CustomerMessagesActivity.class));
-                    overridePendingTransition(0,0);
-                    finish();
-                }
-                return true;
-            }
-
             return false;
         });
     }

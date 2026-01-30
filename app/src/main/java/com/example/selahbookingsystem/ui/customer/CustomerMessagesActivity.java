@@ -25,9 +25,6 @@ public class CustomerMessagesActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
 
-        // If your BaseActivity has this method + bottom nav exists in layout
-        setupBottomNav(R.id.nav_messages);
-
         rvChats = findViewById(R.id.rvChats);
 
         adapter = new ChatPreviewAdapter(chats, chat -> {
@@ -44,12 +41,6 @@ public class CustomerMessagesActivity extends BaseActivity {
         loadDummyChats();
     }
 
-    @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_messages;
-    }
-
-
     private void loadDummyChats() {
         chats.clear();
 
@@ -63,5 +54,10 @@ public class CustomerMessagesActivity extends BaseActivity {
                 "Can you send an inspo pic of the nails you want?", "Mon"));
 
         adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected int getBottomNavMenuItemId() {
+        return R.id.nav_messages;
     }
 }

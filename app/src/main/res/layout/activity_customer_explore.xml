@@ -11,22 +11,22 @@
 
     <!-- TOP TOOLBAR -->
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarExplore"
+        android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/signaturePink"
         android:elevation="0dp"
-        android:minHeight="?attr/actionBarSize"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/menu_explore"
+        android:paddingStart="20dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="1dp"
+        android:paddingBottom="1dp"
         app:title="Explore"
         app:titleTextAppearance="@style/ToolbarTitleBold"
-        app:titleTextColor="@android:color/black"
-        app:itemIconTint="@android:color/black"/>
+        app:menu="@menu/menu_explore"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
     <!-- GRID FEED -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -35,8 +35,7 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbarExplore"
-        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -58,8 +57,7 @@
         android:orientation="vertical"
         android:padding="24dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/toolbarExplore"
-        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

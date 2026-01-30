@@ -95,6 +95,8 @@
         <activity android:name=".ui.customer.BookingBubblesActivity" />
         <activity android:name=".ui.customer.PickTimeslotActivity" />
         <activity android:name=".ui.customer.ConfirmBookingActivity" />
+        <activity android:name=".ui.customer.BookingConfirmedActivity" />
+
 
 
 

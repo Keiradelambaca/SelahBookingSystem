@@ -69,9 +69,11 @@ public class CustomerAppointmentsAdapter
         holder.tvLocation.setText(appointment.getLocationArea());
         holder.tvPrice.setText("€" + String.format("%.2f", appointment.getPrice()));
 
-        String formattedDate =
-                dateFormatter.format(appointment.getAppointmentStart());
-        holder.tvDateTime.setText(formattedDate);
+        if (appointment.getAppointmentStart() != null) {
+            holder.tvDateTime.setText(dateFormatter.format(appointment.getAppointmentStart()));
+        } else {
+            holder.tvDateTime.setText("Time TBC");
+        }
 
         // ---- Payment Status ----
         switch (appointment.getPaymentStatus()) {

@@ -2,38 +2,41 @@ package com.example.selahbookingsystem.ui.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.selahbookingsystem.R;
+import com.example.selahbookingsystem.network.api.ApiClient;
+import com.example.selahbookingsystem.network.service.SupabaseRestService;
+import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.gson.Gson;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CustomerAppointmentDetailActivity extends AppCompatActivity {
 
-    // Intent extras
-    public static final String EXTRA_APPT_ID = "extra_appt_id";
-    public static final String EXTRA_BANNER_URL = "extra_banner_url";
-    public static final String EXTRA_TITLE = "extra_title";
-    public static final String EXTRA_PROVIDER = "extra_provider";
-    public static final String EXTRA_DATETIME = "extra_datetime"; // already formatted string for now
-    public static final String EXTRA_LOCATION_AREA = "extra_location_area";
-    public static final String EXTRA_PRICE = "extra_price";
-    public static final String EXTRA_PAYMENT_STATUS = "extra_payment_status";
-    public static final String EXTRA_LAT = "extra_lat";
-    public static final String EXTRA_LNG = "extra_lng";
+    public static final String EXTRA_BOOKING_ID = "extra_booking_id";
 
     private ImageView ivBanner;
-    private TextView tvTitle, tvProvider, tvDateTime, tvPrice, tvLocation;
+    private TextView tvTitle, tvProvider, tvDateTime, tvLocation, tvStatus, tvDetails, tvPrice;
     private Chip chipPayment;
 
     private LinearLayout receiptItemsContainer;
@@ -43,10 +46,16 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
     private MaterialButton btnReschedule, btnCancel;
     private View mapPreviewCard;
     private MaterialButton btnMessageProvider;
-    private TextView tvTerms;
 
-    private double lat = 0;
-    private double lng = 0;
+    private View progress;
+    private View content;
+
+    private SupabaseRestService api;
+
+    private String bookingId;
+    private BookingDto booking;
+
+    private final Gson gson = new Gson();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,8 +69,10 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         tvProvider = findViewById(R.id.tvProvider);
         tvDateTime = findViewById(R.id.tvDateTime);
-        tvPrice = findViewById(R.id.tvPrice);
         tvLocation = findViewById(R.id.tvLocation);
+        tvStatus = findViewById(R.id.tvStatus);
+        tvDetails = findViewById(R.id.tvDetails);
+        tvPrice = findViewById(R.id.tvPrice);
         chipPayment = findViewById(R.id.chipPayment);
 
         receiptItemsContainer = findViewById(R.id.receiptItemsContainer);
@@ -75,97 +86,119 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
 
         mapPreviewCard = findViewById(R.id.mapPreviewCard);
         btnMessageProvider = findViewById(R.id.btnMessageProvider);
-        tvTerms = findViewById(R.id.tvTerms);
 
-        // ---- Get data from intent (for now) ----
-        Intent i = getIntent();
-        String apptId = i.getStringExtra(EXTRA_APPT_ID);
+        progress = findViewById(R.id.progress);
+        content = findViewById(R.id.content);
 
-        String bannerUrl = i.getStringExtra(EXTRA_BANNER_URL);
-        String title = i.getStringExtra(EXTRA_TITLE);
-        String provider = i.getStringExtra(EXTRA_PROVIDER);
-        String datetime = i.getStringExtra(EXTRA_DATETIME);
-        String locationArea = i.getStringExtra(EXTRA_LOCATION_AREA);
-        double price = i.getDoubleExtra(EXTRA_PRICE, 0);
-        String paymentStatus = i.getStringExtra(EXTRA_PAYMENT_STATUS);
+        api = ApiClient.get().create(SupabaseRestService.class);
 
-        lat = i.getDoubleExtra(EXTRA_LAT, 0);
-        lng = i.getDoubleExtra(EXTRA_LNG, 0);
+        bookingId = getIntent().getStringExtra(EXTRA_BOOKING_ID);
+        if (TextUtils.isEmpty(bookingId)) {
+            Toast.makeText(this, "Missing booking id", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // ---- Bind top section ----
-        tvTitle.setText(title != null ? title : "Appointment");
-        tvProvider.setText(provider != null ? provider : "");
-        tvDateTime.setText(datetime != null ? datetime : "");
-        tvLocation.setText(locationArea != null ? locationArea : "");
-        tvPrice.setText(String.format(Locale.getDefault(), "€%.2f", price));
+        // Buttons (basic V1)
+        btnPay.setOnClickListener(v ->
+                Toast.makeText(this, "Payment flow (todo)", Toast.LENGTH_SHORT).show());
 
-        if (paymentStatus != null) chipPayment.setText(paymentStatus);
+        btnReschedule.setOnClickListener(v ->
+                Toast.makeText(this, "Reschedule (todo)", Toast.LENGTH_SHORT).show());
 
-        if (bannerUrl != null && !bannerUrl.isEmpty()) {
-            Glide.with(this).load(bannerUrl).centerCrop().into(ivBanner);
+        btnCancel.setOnClickListener(v ->
+                Toast.makeText(this, "Cancel (todo)", Toast.LENGTH_SHORT).show());
+
+        // You don't have lat/lng in BookingDto yet → hide/disable map for now
+        mapPreviewCard.setVisibility(View.GONE);
+
+        btnMessageProvider.setOnClickListener(v -> {
+            if (booking == null) return;
+            Intent intent = new Intent(this, CustomerMessagesActivity.class);
+            intent.putExtra("extra_provider_id", booking.provider_id);
+            intent.putExtra("extra_provider_name", safe(booking.provider_name));
+            startActivity(intent);
+        });
+
+        loadBooking();
+    }
+
+    private void loadBooking() {
+        setLoading(true);
+
+        api.getBookingById("*", "eq." + bookingId)
+                .enqueue(new Callback<List<BookingDto>>() {
+                    @Override
+                    public void onResponse(Call<List<BookingDto>> call, Response<List<BookingDto>> response) {
+                        if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                            setLoading(false);
+                            Toast.makeText(CustomerAppointmentDetailActivity.this,
+                                    "Booking not found (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+
+                        booking = response.body().get(0);
+                        bindBooking(booking);
+                        setLoading(false);
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<BookingDto>> call, Throwable t) {
+                        setLoading(false);
+                        Toast.makeText(CustomerAppointmentDetailActivity.this,
+                                "Failed to load booking: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                });
+    }
+
+    private void bindBooking(BookingDto b) {
+
+        // --- Banner image (DTO has inspo_photo_url / current_photo_url) ---
+        String imageUrl = firstNonEmpty(b.inspo_photo_url, b.current_photo_url);
+        if (!TextUtils.isEmpty(imageUrl)) {
+            Glide.with(this).load(imageUrl).centerCrop().into(ivBanner);
         } else {
             ivBanner.setImageResource(R.drawable.placeholder_banner);
         }
 
-        // ---- Receipt mock (replace with real add-ons later) ----
-        // You can remove this once you load from backend using apptId.
-        populateReceiptMock(price);
+        // --- Title (no service_name yet, keep placeholder) ---
+        tvTitle.setText("Appointment");
 
-        // ---- Pay button logic (basic V1) ----
-        // Example: if Deposit not paid -> show "Pay deposit", else if not paid -> "Pay now"
-        String payText = "Pay now";
-        if ("Deposit not paid".equalsIgnoreCase(paymentStatus)) payText = "Pay deposit";
-        btnPay.setText(payText);
+        // --- Provider ---
+        tvProvider.setText(safe(b.provider_name));
 
-        btnPay.setOnClickListener(v -> {
-            // TODO: Integrate Stripe / payment flow later
-        });
+        // --- Date/time + duration ---
+        tvDateTime.setText(formatDateTime(b.start_time, b.duration_mins));
 
-        // ---- Reschedule / Cancel (later) ----
-        btnReschedule.setOnClickListener(v -> {
-            // TODO: open reschedule UI
-        });
-        btnCancel.setOnClickListener(v -> {
-            // TODO: open cancel confirmation
-        });
+        // --- Location (not in booking table yet) ---
+        tvLocation.setText("Near you");
 
-        // ---- Map preview click -> full map page ----
-        mapPreviewCard.setOnClickListener(v -> {
-            Intent mapIntent = new Intent(this, CustomerAppointmentMapActivity.class);
-            mapIntent.putExtra(CustomerAppointmentMapActivity.EXTRA_LAT, lat);
-            mapIntent.putExtra(CustomerAppointmentMapActivity.EXTRA_LNG, lng);
-            mapIntent.putExtra(CustomerAppointmentMapActivity.EXTRA_TITLE,
-                    (title != null ? title : "Appointment location"));
-            startActivity(mapIntent);
-        });
+        // --- Price (not in booking table yet) ---
+        tvPrice.setText("—");
 
-        // ---- Message provider ----
-        btnMessageProvider.setOnClickListener(v -> {
-            // TODO: navigate to messages thread with provider
-        });
+        // --- Status ---
+        tvStatus.setText(!TextUtils.isEmpty(b.status) ? b.status : "");
 
-        // ---- Terms ----
-        tvTerms.setText(
-                "• Cancellations within 24 hours may forfeit your deposit.\n" +
-                        "• Arrive on time. Late arrivals may reduce service time.\n" +
-                        "• If you need to reschedule, please do so at least 24 hours in advance."
-        );
+        // --- Payment chip: no payment_status column yet ---
+        chipPayment.setText(mapPaymentChipText(b.status));
+
+        // --- details_json (Object) → show as JSON string ---
+        tvDetails.setText(detailsToString(b.details_json));
+
+        // Receipt minimal (no prices yet)
+        populateReceiptMock();
     }
 
-    private void populateReceiptMock(double basePrice) {
+    private void populateReceiptMock() {
         receiptItemsContainer.removeAllViews();
 
-        // Mock add-ons
-        addReceiptRow("Base service", basePrice);
-        addReceiptRow("Add-on: Nail art", 10.00);
-        addReceiptRow("Add-on: Extra length", 5.00);
+        addReceiptRow("Service", 0.00);
 
-        double subtotal = basePrice + 10 + 5;
-        double total = subtotal;
-
-        tvSubtotal.setText(String.format(Locale.getDefault(), "€%.2f", subtotal));
-        tvTotal.setText(String.format(Locale.getDefault(), "€%.2f", total));
-        tvPaymentMethod.setText("Card •••• 4242"); // replace later from booking
+        tvSubtotal.setText("€0.00");
+        tvTotal.setText("€0.00");
+        tvPaymentMethod.setText("—");
     }
 
     private void addReceiptRow(String label, double amount) {
@@ -178,4 +211,60 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
 
         receiptItemsContainer.addView(row);
     }
+
+    private void setLoading(boolean loading) {
+        progress.setVisibility(loading ? View.VISIBLE : View.GONE);
+        content.setVisibility(loading ? View.GONE : View.VISIBLE);
+    }
+
+    private String formatDateTime(String startIso, Integer durationMins) {
+        if (TextUtils.isEmpty(startIso)) return "";
+
+        try {
+            OffsetDateTime odt = OffsetDateTime.parse(startIso);
+            String date = odt.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.getDefault()));
+            String time = odt.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()));
+
+            if (durationMins != null && durationMins > 0) {
+                return date + " • " + time + " • " + durationMins + " mins";
+            }
+            return date + " • " + time;
+        } catch (Exception e) {
+            return startIso; // fallback
+        }
+    }
+
+    private String detailsToString(Object detailsJson) {
+        if (detailsJson == null) return "—";
+        try {
+            // Gson will turn LinkedTreeMap etc into JSON
+            return gson.toJson(detailsJson);
+        } catch (Exception e) {
+            return String.valueOf(detailsJson);
+        }
+    }
+
+    private String mapPaymentChipText(String status) {
+        if (status == null) return "Deposit not paid";
+
+        if ("paid".equalsIgnoreCase(status)) return "Paid";
+        if ("deposit_paid".equalsIgnoreCase(status)) return "Deposit paid";
+        if ("cash".equalsIgnoreCase(status) || "pay_by_cash".equalsIgnoreCase(status)) return "Pay by cash";
+
+        return "Deposit not paid";
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s;
+    }
+
+    private static String firstNonEmpty(String... vals) {
+        if (vals == null) return "";
+        for (String v : vals) {
+            if (!TextUtils.isEmpty(v)) return v;
+        }
+        return "";
+    }
 }
+
+
