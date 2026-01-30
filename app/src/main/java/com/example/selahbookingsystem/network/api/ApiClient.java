@@ -69,8 +69,8 @@ public class ApiClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(SUPABASE_URL + "/") // trailing slash required
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .baseUrl(SUPABASE_URL) // trailing slash required
+                    .addConverterFactory(GsonConverterFactory.create()) 
                     .client(client)
                     .build();
         }

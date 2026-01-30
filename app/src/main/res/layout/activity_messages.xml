@@ -3,30 +3,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/messagesRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/signaturePink"
     tools:context=".ui.customer.CustomerMessagesActivity">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/tvMessagesTitle"
+    <!-- TOP TOOLBAR (replaces Messages title TextView) -->
+
+    <!-- Chats list -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarMessages"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Messages"
-        android:textStyle="bold"
-        android:textSize="24sp"
-        android:textColor="@color/black"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="18dp"
-        android:paddingBottom="12dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/signaturePink"
+        android:elevation="0dp"
+        android:paddingStart="1dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="1dp"
+        android:paddingBottom="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Messages"
+        app:titleTextAppearance="@style/ToolbarTitleBold" />
 
-    <!-- List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChats"
         android:layout_width="0dp"
@@ -35,11 +36,13 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="90dp"
+
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/tvMessagesTitle"
+        app:layout_constraintTop_toBottomOf="@id/toolbarMessages"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_chat_preview"/>
+
+        tools:listitem="@layout/item_chat_preview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,8 +1,10 @@
 <resources>
     <!-- App theme must be AppCompat/Material-based -->
-    <style name="Theme.Selah" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Optional customizations -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/black</item>
+    <style name="Theme.Selah" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/signaturePink</item>
+        <item name="android:navigationBarColor">@color/white</item>
+
+        <!-- makes status bar icons dark (good on light pink) -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

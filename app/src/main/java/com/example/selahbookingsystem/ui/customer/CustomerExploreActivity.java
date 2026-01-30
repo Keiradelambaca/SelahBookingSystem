@@ -41,11 +41,6 @@ public class CustomerExploreActivity extends BaseActivity {
     private String jwt;
 
     @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_explore;
-    }
-
-    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -168,5 +163,10 @@ public class CustomerExploreActivity extends BaseActivity {
             });
         }
 
+    }
+
+    @Override
+    protected int getBottomNavMenuItemId() {
+        return R.id.nav_explore;
     }
 }
