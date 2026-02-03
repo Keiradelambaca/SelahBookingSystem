@@ -3,6 +3,7 @@ package com.example.selahbookingsystem.network.service;
 import androidx.annotation.Nullable;
 
 import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
 import com.example.selahbookingsystem.data.model.BookingCreate;
 
 import java.util.List;
@@ -125,6 +126,12 @@ public interface SupabaseRestService {
     Call<List<BookingDto>> getBookingById(
             @Query("select") String select,
             @Query("id") String idFilter
+    );
+
+    @GET("rest/v1/profiles")
+    Call<List<ProfileRoleDto>> getUserRole(
+            @Query("id") String idFilter,
+            @Query("select") String select
     );
 
 }

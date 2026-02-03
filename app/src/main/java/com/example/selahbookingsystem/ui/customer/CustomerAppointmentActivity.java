@@ -42,7 +42,7 @@ public class CustomerAppointmentActivity extends BaseActivity {
         setContentView(R.layout.activity_customer_appointments);
 
         // Toolbar
-        MaterialToolbar toolbar = findViewById(R.id.toolbarAppointments);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         // If you set app:title in XML you can remove the next line
         toolbar.setTitle("Appointments");
         setSupportActionBar(toolbar);

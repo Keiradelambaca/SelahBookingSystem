@@ -14,8 +14,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
 import com.example.selahbookingsystem.data.model.RefreshReq;
 import com.example.selahbookingsystem.network.api.ApiClient;
+import com.example.selahbookingsystem.network.service.SupabaseRestService;
 import com.example.selahbookingsystem.ui.customer.CustomerHomeActivity;
 import com.example.selahbookingsystem.network.service.GoTrueService;
 import com.example.selahbookingsystem.R;
@@ -23,7 +25,9 @@ import com.example.selahbookingsystem.data.store.RoleStore;
 import com.example.selahbookingsystem.data.session.Session;
 import com.example.selahbookingsystem.data.model.SignInReq;
 import com.example.selahbookingsystem.data.store.TokenStore;
-import com.example.selahbookingsystem.ui.provider.WelcomeProviderActivity;
+import com.example.selahbookingsystem.ui.provider.SPHomeActivity;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -136,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
                         Intent next;
                         if (role == RoleStore.Role.PROVIDER) {
-                            next = new Intent(this, WelcomeProviderActivity.class);
+                            next = new Intent(this, SPHomeActivity.class);
                         } else {
                             next = new Intent(this, CustomerHomeActivity.class);
                         }
@@ -166,6 +170,52 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+
+    private void routeUserFromDatabaseRole(String userId) {
+
+        if (userId == null || userId.isEmpty()) {
+            TokenStore.clear(this);
+            return;
+        }
+
+        SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
+
+        api.getUserRole("eq." + userId, "role")
+                .enqueue(new retrofit2.Callback<List<ProfileRoleDto>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<List<ProfileRoleDto>> call,
+                                           retrofit2.Response<List<ProfileRoleDto>> resp) {
+
+                        if (!resp.isSuccessful() || resp.body() == null || resp.body().isEmpty()) {
+                            validationText.setText("No profile found for this user.");
+                            loginButton.setEnabled(true);
+                            return;
+                        }
+
+                        String role = resp.body().get(0).role;
+
+                        Intent next;
+                        if ("provider".equalsIgnoreCase(role) || "service_provider".equalsIgnoreCase(role)) {
+                            next = new Intent(MainActivity.this, SPHomeActivity.class);
+                        } else {
+                            next = new Intent(MainActivity.this, CustomerHomeActivity.class);
+                        }
+
+                        next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(next);
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<List<ProfileRoleDto>> call, Throwable t) {
+                        validationText.setText("Failed to load role: " + t.getMessage());
+                        loginButton.setEnabled(true);
+                    }
+                });
+    }
+
+
 
     private void autoRouteFromStoredSession() {
 
@@ -226,27 +276,77 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void routeToCorrectHome() {
-        String emailUsed = TokenStore.getLastEmail(this);
-        if (emailUsed == null) emailUsed = "";
 
-        RoleStore.Role role = RoleStore.getRole(this, emailUsed);
-
-        Intent next;
-        if (role == RoleStore.Role.PROVIDER) {
-            // Use your real provider landing screen
-            next = new Intent(this, WelcomeProviderActivity.class);
-            // If you have ServiceProviderHomeActivity, swap it in here.
-            // next = new Intent(this, ServiceProviderHomeActivity.class);
-        } else {
-            next = new Intent(this, CustomerHomeActivity.class);
+        String userId = TokenStore.getUserId(this);
+        if (userId == null || userId.isEmpty()) {
+            TokenStore.clear(this);
+            return;
         }
 
-        next.putExtra("EXTRA_USER_ID", TokenStore.getUserId(this));
-        next.putExtra("email", emailUsed);
+        SupabaseRestService api =
+                ApiClient.get().create(SupabaseRestService.class);
 
-        next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(next);
-        finish();
+        api.getUserRole("eq." + userId, "role")
+                .enqueue(new retrofit2.Callback<List<ProfileRoleDto>>() {
+
+                    @Override
+                    public void onResponse(
+                            retrofit2.Call<List<ProfileRoleDto>> call,
+                            retrofit2.Response<List<ProfileRoleDto>> response
+                    ) {
+
+                        if (!response.isSuccessful()) {
+                            String err = "";
+                            try { err = response.errorBody() != null ? response.errorBody().string() : ""; }
+                            catch (Exception ignored) {}
+                            validationText.setText("Role check failed (" + response.code() + "): " + err);
+                            loginButton.setEnabled(true);
+                            return;
+                        }
+
+                        if (response.body() == null || response.body().isEmpty()) {
+                            validationText.setText("No profile row found for this user.");
+                            loginButton.setEnabled(true);
+                            return;
+                        }
+
+
+                        String role = response.body().get(0).role;
+
+                        Intent next;
+
+                        if ("provider".equalsIgnoreCase(role)
+                                || "provider".equalsIgnoreCase(role)) {
+                            next = new Intent(
+                                    MainActivity.this,
+                                    SPHomeActivity.class
+                            );
+                        } else {
+                            next = new Intent(
+                                    MainActivity.this,
+                                    CustomerHomeActivity.class
+                            );
+                        }
+
+                        next.setFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        );
+                        startActivity(next);
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(
+                            retrofit2.Call<List<ProfileRoleDto>> call,
+                            Throwable t
+                    ) {
+                        validationText.setText(
+                                "Failed to load user role: " + t.getMessage()
+                        );
+                        loginButton.setEnabled(true);
+                    }
+                });
     }
 
 
