@@ -3,18 +3,25 @@ package com.example.selahbookingsystem.ui.provider;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.data.store.RoleStore;
+import com.example.selahbookingsystem.ui.base.SPBaseActivity;
 
-public class WelcomeProviderActivity extends AppCompatActivity {
+public class SPHomeActivity extends SPBaseActivity {
+
+    @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_welcome_provider;
+    }
+
+    @Override
+    protected int getSelectedNavItemId() {
+        return R.id.nav_sp_home;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_welcome_provider);
 
         TextView emailTv = findViewById(R.id.emailText);
         TextView phoneTv = findViewById(R.id.phoneText);
@@ -22,6 +29,7 @@ public class WelcomeProviderActivity extends AppCompatActivity {
 
         String email = getIntent().getStringExtra("email");
         if (email == null) email = "";
+
         String phone = RoleStore.getPhone(this, email);
         String eircode = RoleStore.getEircode(this, email);
 

@@ -46,7 +46,7 @@ public class CustomerExploreActivity extends BaseActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_customer_explore);
 
-        toolbar = findViewById(R.id.toolbarExplore);
+        toolbar = findViewById(R.id.toolbar);
         swipeRefresh = findViewById(R.id.swipeRefreshExplore);
         rvLooks = findViewById(R.id.rvExploreLooks);
         emptyState = findViewById(R.id.emptyExploreState);
