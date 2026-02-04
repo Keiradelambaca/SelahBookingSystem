@@ -99,12 +99,14 @@
 
         <activity android:name=".ui.provider.SPProfileActivity" />
         <activity android:name=".ui.provider.SPSchedulingActivity" />
-        <activity android:name=".ui.provider.SPMessagesActivity" />
         <activity android:name=".ui.provider.SPClientsActivity" />
+        <activity android:name=".ui.provider.SPMessagesActivity" />
 
         <activity
             android:name=".ui.provider.SPLocationPickerActivity"
             android:exported="false" />
+
+        <activity android:name=".ui.provider.MessageRequestsActivity" />
 
 
 
