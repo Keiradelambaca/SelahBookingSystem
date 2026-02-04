@@ -6,39 +6,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/signaturePink"
-    tools:context=".ui.provider.SPMessagesActivity">
+    tools:context=".ui.provider.MessageRequestsActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarMessages"
+        android:id="@+id/toolbarRequests"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/signaturePink"
         android:elevation="0dp"
-        android:paddingStart="1dp"
         android:paddingTop="10dp"
+        android:paddingStart="1dp"
         android:paddingEnd="1dp"
         android:paddingBottom="1dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="Messages"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:title="Message requests"
         app:titleTextAppearance="@style/ToolbarTitleBold"
-        app:menu="@menu/menu_sp_messages"
-        app:itemIconTint="@android:color/black" />
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@android:color/black"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChats"
+        android:id="@+id/rvRequests"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="90dp"
+        android:paddingBottom="16dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/toolbarMessages"
+        app:layout_constraintTop_toBottomOf="@id/toolbarRequests"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_chat_preview" />
+        tools:listitem="@layout/item_message_request" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
