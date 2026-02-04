@@ -96,31 +96,67 @@ public interface SupabaseRestService {
     // =========================
 
     // Provider list rows from profiles
-    class ProviderDto {
+    public static class ProviderDto {
         public String id;
         public String full_name;
     }
 
     // Full profile row from public.profiles
-    class ProfileDto {
+    public static class ProfileDto {
         public String id;
         public String email;
         public String phone;
         public String role;
         public String full_name;      // customers + providers
         public String dob;            // customers
-        public String business_name;  // providers (optional)
+        public String business_name;  // providers
         public String eircode;        // optional
+        public String address;        // providers
+        public String banner_url;     // providers
+        public Double lat;            // providers
+        public Double lng;            // providers
+
+
     }
 
     // Body for updating only the name
-    class ProfileUpdateBody {
+    public static class ProfileUpdateBody {
         public String full_name;
 
         public ProfileUpdateBody(String full_name) {
             this.full_name = full_name;
         }
     }
+
+    public static class ProviderLocationUpdateBody {
+        public String eircode;
+        public String address;
+        public Double lat;
+        public Double lng;
+
+        public ProviderLocationUpdateBody(String eircode, String address, Double lat, Double lng) {
+            this.eircode = eircode;
+            this.address = address;
+            this.lat = lat;
+            this.lng = lng;
+        }
+    }
+
+
+    public static class ProviderBannerUpdateBody {
+        public String banner_url;
+        public ProviderBannerUpdateBody(String bannerUrl) { this.banner_url = bannerUrl; }
+    }
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/profiles")
+    Call<List<ProfileDto>> updateProviderBanner(
+            @Query("id") String idFilter,
+            @Body ProviderBannerUpdateBody body
+    );
 
     @GET("rest/v1/bookings")
     Call<List<BookingDto>> getBookingById(
@@ -133,5 +169,17 @@ public interface SupabaseRestService {
             @Query("id") String idFilter,
             @Query("select") String select
     );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/profiles")
+    Call<List<ProfileDto>> updateProviderLocation(
+            @Query("id") String idFilter,
+            @Body ProviderLocationUpdateBody body
+    );
+
+
 
 }
