@@ -69,6 +69,10 @@ public class CustomerHomeActivity extends BaseActivity {
 
 
         loadUpcomingPreview();
+
+        android.util.Log.e("NAV", "CustomerHomeActivity opened! stack=",
+                new RuntimeException("Opened CustomerHomeActivity"));
+
     }
 
     @Override

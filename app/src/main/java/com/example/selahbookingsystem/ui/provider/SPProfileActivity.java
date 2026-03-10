@@ -85,19 +85,11 @@ public class SPProfileActivity extends SPBaseActivity {
         }
     }
 
-
     // Resolve user id
     private String resolveCurrentUserId() {
-
-        // from Intent extra
-        String fromIntent = getIntent().getStringExtra("EXTRA_USER_ID");
-        if (fromIntent != null && !fromIntent.isEmpty()) return fromIntent;
-
-        // from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("selah_auth", Context.MODE_PRIVATE);
-        return prefs.getString("auth_user_id", null);
+        String id = TokenStore.getUserId(this);
+        return (id == null || id.isEmpty()) ? null : id;
     }
-
 
     // Init Views
     private void initViews() {
@@ -441,3 +433,4 @@ public class SPProfileActivity extends SPBaseActivity {
     }
 
 }
+

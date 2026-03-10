@@ -18,7 +18,7 @@ import com.example.selahbookingsystem.data.dto.LookDto;
 import com.example.selahbookingsystem.data.model.LookItem;
 import com.example.selahbookingsystem.data.store.LooksRepository;
 import com.example.selahbookingsystem.network.api.ApiClient;
-import com.example.selahbookingsystem.network.service.SupabaseService;
+import com.example.selahbookingsystem.network.service.SupabaseLooksService;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -39,7 +39,7 @@ public class CustomerLookDetailActivity extends AppCompatActivity {
     private ChipGroup chipTags;
     private MaterialButton btnBook;
 
-    private SupabaseService supabase;
+    private SupabaseLooksService supabase;
     private LooksRepository looksRepo;
 
     private String userId;
@@ -71,7 +71,7 @@ public class CustomerLookDetailActivity extends AppCompatActivity {
             return false;
         });
 
-        supabase = ApiClient.get().create(SupabaseService.class);
+        supabase = ApiClient.get().create(SupabaseLooksService.class);
         looksRepo = new LooksRepository();
 
         SharedPreferences prefs = getSharedPreferences("selah_auth", MODE_PRIVATE);

@@ -1,5 +1,7 @@
 package com.example.selahbookingsystem.data.model;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 public class ServiceItem {
@@ -15,4 +17,7 @@ public class ServiceItem {
 
     @SerializedName("price")
     public Integer price;
+
+    @Nullable
+    public Integer base_price_cents;
 }

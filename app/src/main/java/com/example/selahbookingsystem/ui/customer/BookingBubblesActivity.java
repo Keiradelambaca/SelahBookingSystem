@@ -2,6 +2,7 @@ package com.example.selahbookingsystem.ui.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -10,19 +11,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.selahbookingsystem.R;
+import com.example.selahbookingsystem.data.model.ServiceItem;
+import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.util.NailDurationCalculator;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import android.util.Log;
-
-import com.example.selahbookingsystem.data.model.ServiceItem;
-import com.example.selahbookingsystem.network.api.ApiClient;
-
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,16 +36,17 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
     public static final String EXTRA_SELECTED_MAP = "extra_selected_map";
     public static final String EXTRA_EST_MINS = "extra_est_mins";
     public static final String EXTRA_SERVICE_ID = "extra_service_id";
+    public static final String EXTRA_TOTAL_PRICE_CENTS = "extra_total_price_cents";
 
     private ChipGroup chipGroup;
     private TextView tvEstimated;
 
-    // category -> value
     private final LinkedHashMap<String, String> selections = new LinkedHashMap<>();
 
     private String providerId, providerName;
     private String currentUriStr, inspoUriStr;
     private String serviceId;
+    private int totalPriceCents = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,15 +64,21 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
         Button btnAddOn = findViewById(R.id.btnAddOn);
         Button btnContinue = findViewById(R.id.btnContinue);
 
-        // Phase 1 defaults (can tweak)
+        // Defaults
         setOrReplaceSelection("Service", "Full set");
         setOrReplaceSelection("Length", "Medium");
         setOrReplaceSelection("Shape", "Square");
 
-        ensureDefaultServiceId();
-
         renderChips();
         updateEstimate();
+
+        // Ensure we have a real serviceId for DB insert AND price
+        ensureDefaultServiceId();
+
+        // If serviceId came in already, load price now
+        if (serviceId != null && !serviceId.trim().isEmpty()) {
+            fetchServicePriceCents(serviceId);
+        }
 
         btnAddOn.setOnClickListener(v -> {
             AddOnBottomSheet sheet = AddOnBottomSheet.newInstance(selections);
@@ -87,10 +91,14 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
                 return;
             }
 
-            // If you haven't wired real service selection yet, this will still be null.
-            // You NEED a real uuid from the 'services' table, otherwise insert will fail.
             if (serviceId == null || serviceId.trim().isEmpty()) {
                 Toast.makeText(this, "Missing service (service_id). Select a service first.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Deposits need a total price
+            if (totalPriceCents <= 0) {
+                Toast.makeText(this, "Price not loaded yet. Please wait a moment and try again.", Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -102,10 +110,12 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
             i.putExtra(PickTimeslotActivity.EXTRA_CURRENT_URI, currentUriStr);
             if (inspoUriStr != null) i.putExtra(PickTimeslotActivity.EXTRA_INSPO_URI, inspoUriStr);
 
-            // selections + estimate
             i.putExtra(PickTimeslotActivity.EXTRA_SELECTED_MAP, serializeSelections(selections));
             i.putExtra(PickTimeslotActivity.EXTRA_EST_MINS, estMins);
             i.putExtra(PickTimeslotActivity.EXTRA_SERVICE_ID, serviceId);
+
+            // pass price forward
+            i.putExtra(PickTimeslotActivity.EXTRA_TOTAL_PRICE_CENTS, totalPriceCents);
 
             startActivity(i);
         });
@@ -130,9 +140,9 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
             chip.setOnCloseIconClickListener(v -> {
                 selections.remove(category);
 
-                // If user removes "Service" chip, also clear serviceId (so we force re-select)
                 if ("Service".equals(category)) {
                     serviceId = null;
+                    totalPriceCents = 0;
                 }
 
                 renderChips();
@@ -157,15 +167,16 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
         if (category == null || value == null) return;
 
         if ("Service".equals(category)) {
-            // Store real UUID for DB insert
             serviceId = selectedServiceId;
+            totalPriceCents = 0;
 
-            // Show readable name in chip
             setOrReplaceSelection("Service", value);
+
+            // load price for selected service
+            fetchServicePriceCents(serviceId);
 
         } else if ("Design".equals(category) && designPrompt != null && !designPrompt.trim().isEmpty()) {
             setOrReplaceSelection("Design", designPrompt.trim());
-
         } else {
             setOrReplaceSelection(category, value);
         }
@@ -174,6 +185,34 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
         updateEstimate();
     }
 
+    private void fetchServicePriceCents(String serviceId) {
+        if (serviceId == null || serviceId.trim().isEmpty()) return;
+
+        ApiClient.services()
+                .getServiceById("eq." + serviceId, "id,name,base_price_cents")
+                .enqueue(new Callback<List<ServiceItem>>() {
+                    @Override
+                    public void onResponse(Call<List<ServiceItem>> call, Response<List<ServiceItem>> response) {
+                        if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                            Log.e("PRICE", "Failed to fetch price: HTTP " + response.code());
+                            return;
+                        }
+
+                        ServiceItem s = response.body().get(0);
+                        if (s != null && s.base_price_cents != null) {
+                            totalPriceCents = s.base_price_cents;
+                            Log.d("PRICE", "Loaded totalPriceCents=" + totalPriceCents + " for " + s.name);
+                        } else {
+                            Log.e("PRICE", "base_price_cents missing for serviceId=" + serviceId);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ServiceItem>> call, Throwable t) {
+                        Log.e("PRICE", "Network error fetching price", t);
+                    }
+                });
+    }
 
     public static String serializeSelections(LinkedHashMap<String, String> map) {
         StringBuilder sb = new StringBuilder();
@@ -201,26 +240,32 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
     private void ensureDefaultServiceId() {
         if (serviceId != null && !serviceId.trim().isEmpty()) return;
 
-        // This must match a real row in your services table
-        String defaultServiceName = selections.get("Service"); // e.g. "Full set"
+        String defaultServiceName = selections.get("Service");
         if (defaultServiceName == null || defaultServiceName.trim().isEmpty()) return;
 
-        // Supabase filter: name=eq.Full set
         ApiClient.services()
-                .listServices("id,name") // must include the name column you filter by
+                .listServices("id,name,base_price_cents")
                 .enqueue(new Callback<List<ServiceItem>>() {
                     @Override
                     public void onResponse(Call<List<ServiceItem>> call, Response<List<ServiceItem>> response) {
                         if (!response.isSuccessful() || response.body() == null) {
-                            Log.e("SERVICES", "Failed to fetch services: " + response.code());
+                            Log.e("SERVICES", "Failed to fetch services: HTTP " + response.code());
                             return;
                         }
 
-                        // Find matching name (case-insensitive)
                         for (ServiceItem s : response.body()) {
                             if (s != null && s.id != null && s.name != null
                                     && s.name.equalsIgnoreCase(defaultServiceName)) {
+
                                 serviceId = s.id;
+
+                                if (s.base_price_cents != null) {
+                                    totalPriceCents = s.base_price_cents;
+                                    Log.d("PRICE", "Default price loaded: " + totalPriceCents);
+                                } else {
+                                    fetchServicePriceCents(serviceId);
+                                }
+
                                 Log.d("SERVICES", "Default serviceId set: " + serviceId + " for " + defaultServiceName);
                                 return;
                             }
@@ -235,5 +280,4 @@ public class BookingBubblesActivity extends AppCompatActivity implements AddOnBo
                     }
                 });
     }
-
 }

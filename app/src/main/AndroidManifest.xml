@@ -98,7 +98,10 @@
         <activity android:name=".ui.customer.BookingConfirmedActivity" />
 
         <activity android:name=".ui.provider.SPProfileActivity" />
+
         <activity android:name=".ui.provider.SPSchedulingActivity" />
+        <activity android:name=".ui.provider.SPAvailabilityActivity" />
+
         <activity android:name=".ui.provider.SPClientsActivity" />
         <activity android:name=".ui.provider.SPMessagesActivity" />
 
@@ -108,7 +111,17 @@
 
         <activity android:name=".ui.provider.MessageRequestsActivity" />
 
+        <activity android:name=".ui.provider.ProviderClientsActivity" />
 
+        <activity android:name=".ui.provider.SPServicesActivity" />
+
+        <activity android:name=".ui.customer.CustomerRescheduleActivity" />
+
+        <activity android:name=".ui.provider.SPAutoEmailsActivity" />
+
+        <activity android:name=".ui.provider.SPDepositsPaymentsActivity" />
+
+        <activity android:name=".ui.customer.DepositPaymentActivity" />
 
         <!-- Preloaded fonts -->
         <meta-data
@@ -118,3 +131,4 @@
     </application>
 
 </manifest>
+

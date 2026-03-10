@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvPicked"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New time: —"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPickDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Pick date"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPickTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Pick time"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmReschedule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Confirm reschedule"/>
+</LinearLayout>

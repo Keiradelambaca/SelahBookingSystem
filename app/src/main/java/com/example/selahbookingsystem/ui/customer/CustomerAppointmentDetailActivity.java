@@ -103,11 +103,50 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
         btnPay.setOnClickListener(v ->
                 Toast.makeText(this, "Payment flow (todo)", Toast.LENGTH_SHORT).show());
 
-        btnReschedule.setOnClickListener(v ->
-                Toast.makeText(this, "Reschedule (todo)", Toast.LENGTH_SHORT).show());
+        // Reschedule button
+        btnReschedule.setOnClickListener(v -> {
+            if (booking == null) return;
+            Intent i = new Intent(this, CustomerRescheduleActivity.class);
+            i.putExtra(CustomerRescheduleActivity.EXTRA_BOOKING_ID, bookingId);
+            i.putExtra(CustomerRescheduleActivity.EXTRA_DURATION_MINS, booking.duration_mins != null ? booking.duration_mins : 60);
+            startActivity(i);
+        });
 
-        btnCancel.setOnClickListener(v ->
-                Toast.makeText(this, "Cancel (todo)", Toast.LENGTH_SHORT).show());
+        btnCancel.setOnClickListener(v -> {
+            if (booking == null) return;
+
+            // 1) update booking status
+            SupabaseRestService.BookingUpdateBody body =
+                    new SupabaseRestService.BookingUpdateBody("cancelled", null, null);
+
+            api.updateBooking("eq." + bookingId, body)
+                    .enqueue(new Callback<List<BookingDto>>() {
+                        @Override
+                        public void onResponse(Call<List<BookingDto>> call, Response<List<BookingDto>> response) {
+                            if (response.isSuccessful()) {
+                                toast("Cancelled");
+
+                                // 2) trigger cancellation email (server-side)
+                                java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+                                payload.put("booking_id", bookingId);
+
+                                api.fnBookingCancelledEmail(payload).enqueue(new Callback<java.util.Map<String, Object>>() {
+                                    @Override public void onResponse(Call<java.util.Map<String, Object>> c, Response<java.util.Map<String, Object>> r) {}
+                                    @Override public void onFailure(Call<java.util.Map<String, Object>> c, Throwable t) {}
+                                });
+
+                                loadBooking(); // refresh UI
+                            } else {
+                                toast("Cancel failed (" + response.code() + ")");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<BookingDto>> call, Throwable t) {
+                            toast("Network error");
+                        }
+                    });
+        });
 
         // You don't have lat/lng in BookingDto yet → hide/disable map for now
         mapPreviewCard.setVisibility(View.GONE);
@@ -264,6 +303,10 @@ public class CustomerAppointmentDetailActivity extends AppCompatActivity {
             if (!TextUtils.isEmpty(v)) return v;
         }
         return "";
+    }
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }
 

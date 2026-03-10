@@ -1,16 +1,18 @@
 package com.example.selahbookingsystem.network.service;
 
-import androidx.annotation.Nullable;
-
 import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
-import com.example.selahbookingsystem.data.model.BookingCreate;
+import com.example.selahbookingsystem.data.dto.ServiceDto;
+import com.example.selahbookingsystem.data.dto.ServiceModifierDto;
+import com.example.selahbookingsystem.data.dto.EmailTemplateDto;
+import com.example.selahbookingsystem.data.dto.ProviderSettingsDto;
 
 import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
@@ -61,6 +63,7 @@ public interface SupabaseRestService {
 
     // POST /rest/v1/bookings
     @Headers({
+            "Accept: application/json",
             "Content-Type: application/json",
             "Prefer: return=representation"
     })
@@ -148,6 +151,19 @@ public interface SupabaseRestService {
         public ProviderBannerUpdateBody(String bannerUrl) { this.banner_url = bannerUrl; }
     }
 
+
+    class BookingUpdateBody {
+        public String status;
+        public String start_time;
+        public String end_time;
+
+        public BookingUpdateBody(String status, String start_time, String end_time) {
+            this.status = status;
+            this.start_time = start_time;
+            this.end_time = end_time;
+        }
+    }
+
     @Headers({
             "Content-Type: application/json",
             "Prefer: return=representation"
@@ -158,10 +174,11 @@ public interface SupabaseRestService {
             @Body ProviderBannerUpdateBody body
     );
 
+    @Headers({"Accept: application/json"})
     @GET("rest/v1/bookings")
     Call<List<BookingDto>> getBookingById(
             @Query("select") String select,
-            @Query("id") String idFilter
+            @Query("id") String idEq
     );
 
     @GET("rest/v1/profiles")
@@ -179,6 +196,276 @@ public interface SupabaseRestService {
             @Query("id") String idFilter,
             @Body ProviderLocationUpdateBody body
     );
+
+
+    //BookingDto
+    // A lightweight profile nested object for joins
+    class ProfileMiniDto {
+        public String id;
+        public String full_name;
+        public String email;
+        public String phone;
+    }
+
+    // Booking row that includes the joined client profile
+    class BookingWithClientDto {
+        public String id;
+        public String client_id;
+        public String provider_id;
+        public String status;
+        public String start_time;
+        public String end_time;
+
+        // If your select uses: client:profiles(...)
+        public ProfileMiniDto client;
+    }
+
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/bookings")
+    retrofit2.Call<java.util.List<BookingWithClientDto>> listConfirmedBookingsWithClient(
+            @Query("provider_id") String providerIdEq,   // "eq.<providerId>"
+            @Query("status") String statusEq,            // "eq.confirmed"
+            @Query("select") String select,              // include join
+            @Query("order") String order                 // "start_time.desc"
+    );
+
+    // =========================
+// SP WEEKLY AVAILABILITY
+// =========================
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/sp_weekly_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto>> listWeeklyAvailability(
+            @Query("provider_id") String providerEq, // "eq.<uid>"
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @POST("rest/v1/sp_weekly_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto>> insertWeeklyAvailability(
+            @Body com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto body
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/sp_weekly_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto>> updateWeeklyAvailability(
+            @Query("id") String idEq, // "eq.<id>"
+            @Body com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto body
+    );
+
+    @Headers({"Prefer: return=minimal"})
+    @DELETE("rest/v1/sp_weekly_availability")
+    Call<Void> deleteWeeklyAvailability(
+            @Query("id") String idEq // "eq.<id>"
+    );
+
+    // =========================
+// SP DAILY AVAILABILITY
+// =========================
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/sp_daily_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.DailyAvailabilityDto>> listDailyAvailabilityForDate(
+            @Query("provider_id") String providerEq, // "eq.<uid>"
+            @Query("date") String dateEq,            // "eq.2026-02-16"
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @POST("rest/v1/sp_daily_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.DailyAvailabilityDto>> insertDailyAvailability(
+            @Body com.example.selahbookingsystem.data.dto.DailyAvailabilityDto body
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/sp_daily_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.DailyAvailabilityDto>> updateDailyAvailability(
+            @Query("id") String idEq,
+            @Body com.example.selahbookingsystem.data.dto.DailyAvailabilityDto body
+    );
+
+    @Headers({"Prefer: return=minimal"})
+    @DELETE("rest/v1/sp_daily_availability")
+    Call<Void> deleteDailyAvailability(
+            @Query("id") String idEq
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/sp_weekly_availability")
+    Call<List<com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto>> updateWeeklyAvailabilityByProviderDay(
+            @Query("provider_id") String providerEq,   // "eq.<uid>"
+            @Query("day_of_week") String dayEq,        // "eq.3"
+            @Body com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto body
+    );
+
+
+    // =========================
+// BOOKINGS: get provider bookings within day (exclude times)
+// =========================
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/bookings")
+    Call<List<com.example.selahbookingsystem.data.dto.BookingDto>> listBookingsForProviderBetween(
+            @Query("provider_id") String providerEq,
+            @Query("start_time") List<String> startFilters, // ["gte.<ISO>", "lt.<ISO>"]
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+
+// SERVICES
+
+    // GET /rest/v1/services?provider_id=eq.<uuid>&is_active=eq.true&order=created_at.asc&select=...
+    @Headers({
+            "Accept: application/json"
+    })
+    @GET("rest/v1/services")
+    Call<List<ServiceDto>> listServicesForProvider(
+            @Query("provider_id") String providerIdEq,   // "eq.<uuid>"
+            @Query("is_active") String isActiveEq,       // "eq.true"
+            @Query("order") String order,                // "created_at.asc"
+            @Query("select") String select               // "id,provider_id,name,base_price_cents,base_duration_mins,is_active"
+    );
+
+    // Create service
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @POST("rest/v1/services")
+    Call<List<ServiceDto>> createService(@Body Map<String, Object> body);
+
+    // Update service
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/services")
+    Call<List<ServiceDto>> updateService(
+            @Query("id") String idEq, // "eq.<serviceId>"
+            @Body Map<String, Object> body
+    );
+
+// =========================
+// SERVICE MODIFIERS (bubbles)
+// =========================
+
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/service_modifiers")
+    Call<List<ServiceModifierDto>> listModifiersForService(
+            @Query("service_id") String serviceIdEq, // "eq.<serviceId>"
+            @Query("is_active") String isActiveEq,   // "eq.true"
+            @Query("order") String order,            // "created_at.asc" (add column if you want)
+            @Query("select") String select           // "id,service_id,label,price_delta_cents,duration_delta_mins,kind,is_default,is_active"
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @POST("rest/v1/service_modifiers")
+    Call<List<ServiceModifierDto>> createModifier(@Body Map<String, Object> body);
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/service_modifiers")
+    Call<List<ServiceModifierDto>> updateModifier(
+            @Query("id") String idEq, // "eq.<modifierId>"
+            @Body Map<String, Object> body
+    );
+
+
+    // =========================
+// AUTO EMAIL TEMPLATES
+// =========================
+
+    // GET /rest/v1/email_templates?provider_id=eq.<uid>&select=...
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/email_templates")
+    Call<List<EmailTemplateDto>> listEmailTemplatesForProvider(
+            @Query("provider_id") String providerIdEq,   // "eq.<uid>"
+            @Query("select") String select
+    );
+
+    /**
+     * Upsert templates (insert if missing, update if exists based on unique(provider_id,type))
+     * POST /rest/v1/email_templates?on_conflict=provider_id,type
+     * Headers: Prefer: resolution=merge-duplicates, return=representation
+     */
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: resolution=merge-duplicates, return=representation"
+    })
+    @POST("rest/v1/email_templates")
+    Call<List<EmailTemplateDto>> upsertEmailTemplates(
+            @Query("on_conflict") String onConflict,   // "provider_id,type"
+            @Body List<EmailTemplateDto> body
+    );
+
+
+// BOOKINGS: update (cancel/reschedule/status)
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+    })
+    @PATCH("rest/v1/bookings")
+    Call<List<BookingDto>> updateBooking(
+            @Query("id") String idEq,     // "eq.<bookingId>"
+            @Body BookingUpdateBody body
+    );
+
+
+// EDGE FUNCTIONS: booking emails
+
+    @Headers({"Content-Type: application/json"})
+    @POST("functions/v1/booking-confirmed-email")
+    Call<Map<String, Object>> fnBookingConfirmedEmail(@Body Map<String, Object> body);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("functions/v1/booking-cancelled-email")
+    Call<Map<String, Object>> fnBookingCancelledEmail(@Body Map<String, Object> body);
+
+    @Headers({"Content-Type: application/json"})
+    @POST("functions/v1/booking-rescheduled-email")
+    Call<Map<String, Object>> fnBookingRescheduledEmail(@Body Map<String, Object> body);
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("functions/v1/create-deposit-checkout")
+    Call<Map<String, Object>> fnCreateDepositCheckout(@Body Map<String, Object> body);
+
+// PROVIDER SETTINGS
+
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/provider_settings")
+    Call<List<ProviderSettingsDto>> getProviderSettings(
+            @Query("provider_id") String providerIdEq,
+            @Query("select") String select
+    );
+
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json",
+            "Prefer: resolution=merge-duplicates,return=representation"
+    })
+    @POST("rest/v1/provider_settings")
+    Call<List<ProviderSettingsDto>> upsertProviderSettings(@Body Map<String, Object> body);
 
 
 
