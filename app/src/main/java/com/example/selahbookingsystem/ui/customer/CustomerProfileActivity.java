@@ -81,16 +81,10 @@ public class CustomerProfileActivity extends BaseActivity {
      * or pass it in the Intent as EXTRA_USER_ID.
      */
     private String resolveCurrentUserId() {
-        // 1) From Intent extra
-        String fromIntent = getIntent().getStringExtra("EXTRA_USER_ID");
-        if (fromIntent != null && !fromIntent.isEmpty()) {
-            return fromIntent;
-        }
-
-        // 2) From SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("selah_auth", Context.MODE_PRIVATE);
-        return prefs.getString("auth_user_id", null);
+        String id = TokenStore.getUserId(this);
+        return (id == null || id.isEmpty()) ? null : id;
     }
+
 
     private void initViews() {
         profileImage = findViewById(R.id.profileImage);

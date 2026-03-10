@@ -14,7 +14,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
-public interface SupabaseService {
+public interface SupabaseLooksService {
 
     @GET("rest/v1/looks")
     Call<List<LookDto>> getLooks(

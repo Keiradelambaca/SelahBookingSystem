@@ -17,7 +17,7 @@ import com.example.selahbookingsystem.adapter.LooksAdapter;
 import com.example.selahbookingsystem.data.model.LookItem;              // ✅ correct import
 import com.example.selahbookingsystem.data.store.LooksRepository;
 import com.example.selahbookingsystem.network.api.ApiClient;
-import com.example.selahbookingsystem.network.service.SupabaseService;
+import com.example.selahbookingsystem.network.service.SupabaseLooksService;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class CustomerLikedLooksActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         // ✅ Build repository exactly how your constructor expects
-        SupabaseService service = ApiClient.get().create(SupabaseService.class);
+        SupabaseLooksService service = ApiClient.get().create(SupabaseLooksService.class);
         repo = new LooksRepository();
 
         // ✅ Get userId from your prefs (you already saved it on login)

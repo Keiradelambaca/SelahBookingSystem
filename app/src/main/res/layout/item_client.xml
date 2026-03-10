@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardClient"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="10dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#14000000"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <!-- COLLAPSED INFO -->
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Client Name"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"/>
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="email@email.com"
+            android:textSize="13sp"
+            android:textColor="#8A000000"
+            android:paddingTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+353..."
+            android:textSize="13sp"
+            android:textColor="#8A000000"
+            android:paddingTop="2dp"/>
+
+        <!-- EXPANDED SECTION -->
+        <LinearLayout
+            android:id="@+id/expandedSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingTop="14dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#14000000"/>
+
+            <TextView
+                android:id="@+id/tvTimesBooked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Times booked: 0"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:paddingTop="12dp"/>
+
+            <TextView
+                android:id="@+id/tvLastAppointment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Last appointment: —"
+                android:textColor="#8A000000"
+                android:textSize="13sp"
+                android:paddingTop="6dp"/>
+
+            <TextView
+                android:id="@+id/tvPayment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Saved card: —"
+                android:textColor="#8A000000"
+                android:textSize="13sp"
+                android:paddingTop="6dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChargeRemainder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Charge remainder"
+                android:layout_marginTop="12dp"
+                style="?attr/materialButtonOutlinedStyle"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

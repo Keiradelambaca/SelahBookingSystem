@@ -42,6 +42,27 @@
                 android:fontFamily="@font/poppins"
                 android:layout_marginBottom="12dp"/>
 
+            <!-- Loading spinner -->
+            <ProgressBar
+                android:id="@+id/timesProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"
+                android:layout_marginBottom="10dp"/>
+
+            <!-- Empty / error state -->
+            <TextView
+                android:id="@+id/timesEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No slots available"
+                android:gravity="center"
+                android:visibility="gone"
+                android:fontFamily="@font/poppins"
+                android:alpha="0.75"
+                android:layout_marginBottom="10dp"/>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvTimes"
                 android:layout_width="match_parent"

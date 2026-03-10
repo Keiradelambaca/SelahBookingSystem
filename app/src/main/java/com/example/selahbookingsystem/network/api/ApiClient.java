@@ -23,10 +23,6 @@ public class ApiClient {
     private static Retrofit retrofit;
     private static Context appContext;
 
-    /**
-     * Call once from your Application class (recommended),
-     * or before the first ApiClient.get() call.
-     */
     public static void init(Context context) {
         appContext = context.getApplicationContext();
     }
@@ -37,20 +33,17 @@ public class ApiClient {
             Interceptor headerInterceptor = chain -> {
                 Request original = chain.request();
 
-                // Pull the saved user JWT (set during login: TokenStore.save(...))
                 String jwt = null;
                 if (appContext != null) {
-                    jwt = TokenStore.getAccessToken(appContext); // <-- must exist in your TokenStore
+                    jwt = TokenStore.getAccessToken(appContext);
                 }
 
                 Request.Builder builder = original.newBuilder()
                         .addHeader("apikey", SUPABASE_ANON_KEY);
 
-                // Use real user JWT when available (required for RLS + likes + provider uploads)
                 if (jwt != null && !jwt.isEmpty()) {
                     builder.addHeader("Authorization", "Bearer " + jwt);
                 } else {
-                    // Fallback (read-only / not logged in). RLS writes will fail without JWT.
                     builder.addHeader("Authorization", "Bearer " + SUPABASE_ANON_KEY);
                 }
 
@@ -69,7 +62,7 @@ public class ApiClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(SUPABASE_URL) // trailing slash required
+                    .baseUrl(SUPABASE_URL)
                     .addConverterFactory(GsonConverterFactory.create()) 
                     .client(client)
                     .build();

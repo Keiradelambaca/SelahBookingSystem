@@ -1,12 +1,13 @@
 package com.example.selahbookingsystem.ui.auth;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,26 +15,32 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
 import com.example.selahbookingsystem.data.model.RefreshReq;
+import com.example.selahbookingsystem.data.model.SignInReq;
+import com.example.selahbookingsystem.data.session.Session;
+import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
+import com.example.selahbookingsystem.network.service.GoTrueService;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
 import com.example.selahbookingsystem.ui.customer.CustomerHomeActivity;
-import com.example.selahbookingsystem.network.service.GoTrueService;
-import com.example.selahbookingsystem.R;
-import com.example.selahbookingsystem.data.store.RoleStore;
-import com.example.selahbookingsystem.data.session.Session;
-import com.example.selahbookingsystem.data.model.SignInReq;
-import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.ui.provider.SPHomeActivity;
 
 import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText emailEditText, passwordEditText;
-    Button loginButton;
-    TextView validationText, signupText;
+    private static final String TAG = "AUTH_ROUTE";
+
+    private EditText emailEditText, passwordEditText;
+    private Button loginButton;
+    private TextView validationText, signupText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        emailEditText   = findViewById(R.id.emailEditText);
-        passwordEditText= findViewById(R.id.passwordEditText);
-        loginButton     = findViewById(R.id.loginButton);
-        validationText  = findViewById(R.id.validationText);
-        signupText      = findViewById(R.id.signupText);
+        emailEditText    = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        loginButton      = findViewById(R.id.loginButton);
+        validationText   = findViewById(R.id.validationText);
+        signupText       = findViewById(R.id.signupText);
 
         // Auto-login: if we have a stored session, skip login screen
         if (TokenStore.hasSession(this)) {
@@ -65,104 +72,9 @@ public class MainActivity extends AppCompatActivity {
             passwordEditText.requestFocus();
         }
 
-        loginButton.setOnClickListener(v -> {
-            validationText.setText("");
+        loginButton.setOnClickListener(v -> attemptLogin());
 
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
-
-            boolean validEmail = email.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(email).matches();
-            boolean validPassword = password.length() >= 6 && password.matches(".*\\d.*") && !password.contains(" ");
-
-            // Validate first; do NOT hit network if invalid
-            if (!validEmail && !validPassword) {
-                validationText.setText("Invalid email and password.");
-                return;
-            }
-            if (!validEmail) {
-                validationText.setText("Invalid email.");
-                return;
-            }
-            if (!validPassword) {
-                validationText.setText("Invalid password.");
-                return;
-            }
-
-            // Disable button while logging in
-            loginButton.setEnabled(false);
-            validationText.setText("Signing in...");
-
-            new Thread(() -> {
-                try {
-                    GoTrueService auth = ApiClient.get().create(GoTrueService.class);
-                    retrofit2.Response<Session> r =
-                            auth.signIn("password", new SignInReq(email, password)).execute();
-
-                    if (!r.isSuccessful() || r.body() == null || r.body().accessToken == null) {
-                        String err = (r.errorBody() != null) ? r.errorBody().string() : "Login failed";
-                        runOnUiThread(() -> {
-                            validationText.setText("Login failed: " + err);
-                            loginButton.setEnabled(true);
-                        });
-                        return;
-                    }
-
-                    Session s = r.body();
-
-                    // Save tokens + expiry + userId + last email for auto-login
-                    TokenStore.save(
-                            MainActivity.this,
-                            s.accessToken,
-                            s.refreshToken,
-                            s.expiresIn,
-                            (s.user != null ? s.user.id : null),
-                            email
-                    );
-
-                    // Optional: keep SessionManager in memory too
-                    com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
-
-
-                    // --- Save the Supabase authenticated user ID + last email ---
-                    String supabaseUserId = r.body().user.id;
-
-                    SharedPreferences prefs = getSharedPreferences("selah_auth", MODE_PRIVATE);
-                    prefs.edit()
-                            .putString("auth_user_id", supabaseUserId)
-                            .putString("last_email", email)   // 👈 ADD THIS LINE
-                            .apply();
-
-
-                    // >>> Route to correct welcome screen based on saved role <<<
-                    runOnUiThread(() -> {
-                        String emailUsed = email; // whatever variable you validated against
-                        RoleStore.Role role = RoleStore.getRole(this, emailUsed);
-
-                        Intent next;
-                        if (role == RoleStore.Role.PROVIDER) {
-                            next = new Intent(this, SPHomeActivity.class);
-                        } else {
-                            next = new Intent(this, CustomerHomeActivity.class);
-                        }
-
-                        next.putExtra("EXTRA_USER_ID", supabaseUserId);
-                        next.putExtra("email", emailUsed);
-                        next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(next);
-                    });
-
-                } catch (Exception ex) {
-                    runOnUiThread(() -> {
-                        validationText.setText("Login error: " + ex.getMessage());
-                        loginButton.setEnabled(true);
-                    });
-                }
-            }).start();
-        });
-
-        signupText.setOnClickListener(v -> {
-            startActivity(new Intent(this, SignupActivity1.class));
-        });
+        signupText.setOnClickListener(v -> startActivity(new Intent(this, SignupActivity1.class)));
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v2, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -171,183 +83,208 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void attemptLogin() {
+        validationText.setText("");
 
-    private void routeUserFromDatabaseRole(String userId) {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
 
-        if (userId == null || userId.isEmpty()) {
-            TokenStore.clear(this);
+        boolean validEmail = email.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        boolean validPassword = password.length() >= 6 && password.matches(".*\\d.*") && !password.contains(" ");
+
+        // Validate first; do NOT hit network if invalid
+        if (!validEmail && !validPassword) {
+            validationText.setText("Invalid email and password.");
+            return;
+        }
+        if (!validEmail) {
+            validationText.setText("Invalid email.");
+            return;
+        }
+        if (!validPassword) {
+            validationText.setText("Invalid password.");
             return;
         }
 
-        SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
-
-        api.getUserRole("eq." + userId, "role")
-                .enqueue(new retrofit2.Callback<List<ProfileRoleDto>>() {
-                    @Override
-                    public void onResponse(retrofit2.Call<List<ProfileRoleDto>> call,
-                                           retrofit2.Response<List<ProfileRoleDto>> resp) {
-
-                        if (!resp.isSuccessful() || resp.body() == null || resp.body().isEmpty()) {
-                            validationText.setText("No profile found for this user.");
-                            loginButton.setEnabled(true);
-                            return;
-                        }
-
-                        String role = resp.body().get(0).role;
-
-                        Intent next;
-                        if ("provider".equalsIgnoreCase(role) || "service_provider".equalsIgnoreCase(role)) {
-                            next = new Intent(MainActivity.this, SPHomeActivity.class);
-                        } else {
-                            next = new Intent(MainActivity.this, CustomerHomeActivity.class);
-                        }
-
-                        next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(next);
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(retrofit2.Call<List<ProfileRoleDto>> call, Throwable t) {
-                        validationText.setText("Failed to load role: " + t.getMessage());
-                        loginButton.setEnabled(true);
-                    }
-                });
-    }
-
-
-
-    private void autoRouteFromStoredSession() {
-
-        // If access token is still valid, route immediately.
-        if (TokenStore.isAccessTokenValid(this)) {
-            routeToCorrectHome();
-            return;
-        }
-
-        // Otherwise refresh token in background
-        validationText.setText("Restoring session...");
-        loginButton.setEnabled(false);
+        setLoading(true, "Signing in...");
 
         new Thread(() -> {
             try {
                 GoTrueService auth = ApiClient.get().create(GoTrueService.class);
+                Response<Session> r = auth.signIn("password", new SignInReq(email, password)).execute();
 
-                // IMPORTANT: you need a refresh endpoint in GoTrueService (next section)
-                String refreshToken = TokenStore.getRefreshToken(this);
-                retrofit2.Response<Session> rr =
-                        auth.refreshToken(new RefreshReq(refreshToken)).execute();
-
-                if (!rr.isSuccessful() || rr.body() == null || rr.body().accessToken == null) {
+                if (!r.isSuccessful() || r.body() == null || r.body().accessToken == null) {
+                    String err = (r.errorBody() != null) ? r.errorBody().string() : "Login failed";
                     runOnUiThread(() -> {
-                        // Refresh failed -> go back to normal login
-                        TokenStore.clear(this);
-                        validationText.setText("");
-                        loginButton.setEnabled(true);
+                        validationText.setText("Login failed: " + err);
+                        setLoading(false, null);
                     });
                     return;
                 }
 
-                Session s = rr.body();
+                Session s = r.body();
+                String userId = (s.user != null ? s.user.id : null);
 
-                // Save new session
-                String email = TokenStore.getLastEmail(this);
+                // Save tokens + expiry + userId + last email for auto-login
                 TokenStore.save(
-                        this,
+                        MainActivity.this,
                         s.accessToken,
                         s.refreshToken,
                         s.expiresIn,
-                        (s.user != null ? s.user.id : null),
+                        userId,
                         email
                 );
 
-                com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
+                // Optional: keep SessionManager in memory too (only if you actually have it)
+                // com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
 
-                runOnUiThread(this::routeToCorrectHome);
+                // IMPORTANT: route based on DATABASE role (profiles.role), NOT RoleStore-by-email
+                runOnUiThread(() -> routeToCorrectHomeFromDbRole(userId));
 
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 runOnUiThread(() -> {
-                    TokenStore.clear(this);
-                    validationText.setText("");
-                    loginButton.setEnabled(true);
+                    validationText.setText("Login error: " + ex.getMessage());
+                    setLoading(false, null);
                 });
             }
         }).start();
     }
 
-    private void routeToCorrectHome() {
+    /**
+     * Auto-login:
+     * - If access token valid -> route by DB role
+     * - Else refresh token -> save new session -> route by DB role
+     */
+    private void autoRouteFromStoredSession() {
 
-        String userId = TokenStore.getUserId(this);
-        if (userId == null || userId.isEmpty()) {
-            TokenStore.clear(this);
+        // If access token is still valid, route immediately (BUT STILL BY DB ROLE)
+        if (TokenStore.isAccessTokenValid(this)) {
+            String userId = TokenStore.getUserId(this);
+            routeToCorrectHomeFromDbRole(userId);
             return;
         }
 
-        SupabaseRestService api =
-                ApiClient.get().create(SupabaseRestService.class);
+        // Otherwise refresh token in background
+        setLoading(true, "Restoring session...");
 
-        api.getUserRole("eq." + userId, "role")
-                .enqueue(new retrofit2.Callback<List<ProfileRoleDto>>() {
+        new Thread(() -> {
+            try {
+                GoTrueService auth = ApiClient.get().create(GoTrueService.class);
 
-                    @Override
-                    public void onResponse(
-                            retrofit2.Call<List<ProfileRoleDto>> call,
-                            retrofit2.Response<List<ProfileRoleDto>> response
-                    ) {
+                String refreshToken = TokenStore.getRefreshToken(this);
+                Response<Session> rr = auth.refreshToken(new RefreshReq(refreshToken)).execute();
 
-                        if (!response.isSuccessful()) {
-                            String err = "";
-                            try { err = response.errorBody() != null ? response.errorBody().string() : ""; }
-                            catch (Exception ignored) {}
-                            validationText.setText("Role check failed (" + response.code() + "): " + err);
-                            loginButton.setEnabled(true);
-                            return;
-                        }
+                if (!rr.isSuccessful() || rr.body() == null || rr.body().accessToken == null) {
+                    runOnUiThread(() -> {
+                        TokenStore.clear(this);
+                        setLoading(false, null);
+                        validationText.setText("");
+                    });
+                    return;
+                }
 
-                        if (response.body() == null || response.body().isEmpty()) {
-                            validationText.setText("No profile row found for this user.");
-                            loginButton.setEnabled(true);
-                            return;
-                        }
+                Session s = rr.body();
+                String userId = (s.user != null ? s.user.id : null);
+                String email = TokenStore.getLastEmail(this);
 
+                TokenStore.save(
+                        MainActivity.this,
+                        s.accessToken,
+                        s.refreshToken,
+                        s.expiresIn,
+                        userId,
+                        email
+                );
 
-                        String role = response.body().get(0).role;
+                // com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
 
-                        Intent next;
+                runOnUiThread(() -> routeToCorrectHomeFromDbRole(userId));
 
-                        if ("provider".equalsIgnoreCase(role)
-                                || "provider".equalsIgnoreCase(role)) {
-                            next = new Intent(
-                                    MainActivity.this,
-                                    SPHomeActivity.class
-                            );
-                        } else {
-                            next = new Intent(
-                                    MainActivity.this,
-                                    CustomerHomeActivity.class
-                            );
-                        }
-
-                        next.setFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        );
-                        startActivity(next);
-                        finish();
-                    }
-
-                    @Override
-                    public void onFailure(
-                            retrofit2.Call<List<ProfileRoleDto>> call,
-                            Throwable t
-                    ) {
-                        validationText.setText(
-                                "Failed to load user role: " + t.getMessage()
-                        );
-                        loginButton.setEnabled(true);
-                    }
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    TokenStore.clear(this);
+                    setLoading(false, null);
+                    validationText.setText("");
                 });
+            }
+        }).start();
     }
 
+    /**
+     * ALWAYS route by the role stored in Supabase profiles table.
+     * This prevents "provider logs in -> client UI" caused by stale RoleStore/SharedPrefs.
+     */
+    private void routeToCorrectHomeFromDbRole(String userId) {
 
+        if (userId == null || userId.trim().isEmpty()) {
+            TokenStore.clear(this);
+            setLoading(false, null);
+            validationText.setText("Session invalid. Please log in again.");
+            return;
+        }
+
+        Log.d(TAG, "routeToCorrectHomeFromDbRole userId=" + userId);
+
+        SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
+
+        // NOTE: you must have this endpoint in SupabaseRestService:
+        // Call<List<ProfileRoleDto>> getUserRole(@Query("id") String idEq, @Query("select") String select);
+        api.getUserRole("eq." + userId, "role").enqueue(new Callback<List<ProfileRoleDto>>() {
+            @Override
+            public void onResponse(Call<List<ProfileRoleDto>> call, Response<List<ProfileRoleDto>> response) {
+
+                String debugRole = (response.body() != null && !response.body().isEmpty())
+                        ? response.body().get(0).role
+                        : "EMPTY";
+
+                Log.d(TAG, "getUserRole code=" + response.code() + " role=" + debugRole);
+
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    setLoading(false, null);
+                    validationText.setText("No role found for this user.");
+                    loginButton.setEnabled(true);
+                    return;
+                }
+
+                String roleRaw = response.body().get(0).role;
+                if (roleRaw == null) {
+                    setLoading(false, null);
+                    validationText.setText("Role missing on profile.");
+                    loginButton.setEnabled(true);
+                    return;
+                }
+
+                String role = roleRaw.trim().toLowerCase(Locale.ROOT);
+
+                Intent next;
+                if (role.equals("provider") || role.equals("service_provider")) {
+                    next = new Intent(MainActivity.this, SPHomeActivity.class);
+                } else if (role.equals("client")) {
+                    next = new Intent(MainActivity.this, CustomerHomeActivity.class);
+                } else {
+                    setLoading(false, null);
+                    Toast.makeText(MainActivity.this, "Unknown role: " + role, Toast.LENGTH_LONG).show();
+                    loginButton.setEnabled(true);
+                    return;
+                }
+
+                next.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(next);
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<List<ProfileRoleDto>> call, Throwable t) {
+                Log.e(TAG, "getUserRole FAILED", t);
+                setLoading(false, null);
+                validationText.setText("Failed to load user role: " + t.getMessage());
+                loginButton.setEnabled(true);
+            }
+        });
+    }
+
+    private void setLoading(boolean loading, String message) {
+        loginButton.setEnabled(!loading);
+        if (message != null) validationText.setText(message);
+    }
 }

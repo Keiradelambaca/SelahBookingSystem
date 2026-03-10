@@ -6,7 +6,7 @@ import com.example.selahbookingsystem.data.dto.LikeDto;
 import com.example.selahbookingsystem.data.dto.LookDto;
 import com.example.selahbookingsystem.data.model.LookItem;
 import com.example.selahbookingsystem.network.api.ApiClient;
-import com.example.selahbookingsystem.network.service.SupabaseService;
+import com.example.selahbookingsystem.network.service.SupabaseLooksService;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,10 +25,10 @@ public class LooksRepository {
         void onError(String message);
     }
 
-    private final SupabaseService api;
+    private final SupabaseLooksService api;
 
     public LooksRepository() {
-        this.api = ApiClient.get().create(SupabaseService.class);
+        this.api = ApiClient.get().create(SupabaseLooksService.class);
     }
 
     public void loadExploreFeed(

@@ -18,7 +18,7 @@ import com.example.selahbookingsystem.adapter.LooksAdapter;
 import com.example.selahbookingsystem.data.model.LookItem;
 import com.example.selahbookingsystem.data.store.LooksRepository;
 import com.example.selahbookingsystem.network.api.ApiClient;
-import com.example.selahbookingsystem.network.service.SupabaseService;
+import com.example.selahbookingsystem.network.service.SupabaseLooksService;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -66,7 +66,7 @@ public class CustomerExploreActivity extends BaseActivity {
         }
 
         // repo (your version expects constructor args)
-        SupabaseService service = ApiClient.get().create(SupabaseService.class);
+        SupabaseLooksService service = ApiClient.get().create(SupabaseLooksService.class);
         repo = new LooksRepository();
 
         setupToolbar();
