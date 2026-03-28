@@ -123,6 +123,8 @@
 
         <activity android:name=".ui.customer.DepositPaymentActivity" />
 
+        <activity android:name=".ui.provider.SPAppointmentDetailsActivity" />
+
         <!-- Preloaded fonts -->
         <meta-data
             android:name="preloaded_fonts"

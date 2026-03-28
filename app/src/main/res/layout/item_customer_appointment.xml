@@ -6,27 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="14dp"
+    android:clickable="true"
+    android:focusable="true"
     app:cardCornerRadius="18dp"
     app:cardElevation="2dp"
-    app:strokeWidth="1dp"
     app:strokeColor="#14000000"
-    android:clickable="true"
-    android:focusable="true">
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Top half: Banner photo -->
         <ImageView
             android:id="@+id/ivBanner"
             android:layout_width="match_parent"
             android:layout_height="170dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="Provider banner" />
+            android:contentDescription="Appointment image"
+            android:scaleType="centerCrop" />
 
-        <!-- Bottom half: text -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,75 +35,76 @@
                 android:id="@+id/tvServiceTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gel Nails (Full Set)"
-                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Nail Appointment"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:maxLines="2"
-                android:ellipsize="end" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvProviderName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="by Selah Beauty"
-                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingTop="6dp"
+                android:text="Keiras Nail"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
-                android:paddingTop="6dp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvDateTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Fri 23 Feb • 14:30"
-                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingTop="6dp"
+                android:text="Fri 20 Mar • 09:00"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
-                android:paddingTop="6dp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dublin 2"
-                android:textColor="#666666"
-                android:textSize="13sp"
-                android:paddingTop="6dp"
+                android:ellipsize="end"
                 android:maxLines="1"
-                android:ellipsize="end" />
+                android:paddingTop="6dp"
+                android:text="Near you"
+                android:textColor="#666666"
+                android:textSize="13sp" />
 
             <LinearLayout
+                android:id="@+id/priceRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingTop="10dp">
 
                 <TextView
                     android:id="@+id/tvPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="€55"
-                    android:textStyle="bold"
+                    android:text="€0.00"
                     android:textColor="@android:color/black"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipPaymentStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:text="Deposit paid"
+                    android:text="Deposit not paid"
+                    android:textColor="@android:color/black"
                     app:chipCornerRadius="16dp"
                     app:chipMinHeight="32dp"
-                    app:chipStrokeWidth="1dp"
                     app:chipStrokeColor="#22000000"
-                    android:textColor="@android:color/black" />
+                    app:chipStrokeWidth="1dp" />
 
             </LinearLayout>
 

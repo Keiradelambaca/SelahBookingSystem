@@ -60,9 +60,8 @@ public class CustomerAppointment {
     public Instant getAppointmentStart() { return appointmentStart; }
     public int getDurationMins() { return durationMins; }
 
-    // =====================
-    // SETTERS ✅
-    // =====================
+
+    // SETTERS
 
     public void setId(String id) {
         this.id = id;

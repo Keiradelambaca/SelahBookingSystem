@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 
 import com.example.selahbookingsystem.R;
+import com.example.selahbookingsystem.network.storage.SupabaseStorageUploader;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
 
 public class BookingPhotosActivity extends BaseActivity {
@@ -27,11 +28,10 @@ public class BookingPhotosActivity extends BaseActivity {
     private Uri inspoUri = null;
 
     private ImageView imgCurrent, imgInspo;
+    private Button btnContinue;
 
     @Override
     protected int getBottomNavMenuItemId() {
-        // booking flow usually shouldn’t highlight a bottom nav item
-        // but BaseActivity requires one; choose home
         return R.id.nav_home;
     }
 
@@ -63,44 +63,113 @@ public class BookingPhotosActivity extends BaseActivity {
         providerText.setText("Booking with: " + (providerName != null ? providerName : ""));
 
         imgCurrent = findViewById(R.id.imgCurrent);
-        imgInspo   = findViewById(R.id.imgInspo);
+        imgInspo = findViewById(R.id.imgInspo);
 
         Button btnPickCurrent = findViewById(R.id.btnPickCurrent);
-        Button btnPickInspo   = findViewById(R.id.btnPickInspo);
-        TextView btnNoInspo   = findViewById(R.id.btnNoInspo);
-        Button btnContinue    = findViewById(R.id.btnContinue);
+        Button btnPickInspo = findViewById(R.id.btnPickInspo);
+        TextView btnNoInspo = findViewById(R.id.btnNoInspo);
+        btnContinue = findViewById(R.id.btnContinue);
 
         btnPickCurrent.setOnClickListener(v -> pickCurrentLauncher.launch("image/*"));
         btnPickInspo.setOnClickListener(v -> pickInspoLauncher.launch("image/*"));
 
-        btnNoInspo.setOnClickListener(v -> {
-            // Phase 1: just show a toast until Explore booking handoff is built
-            Toast.makeText(this, "Explore flow next (Phase 1.5)", Toast.LENGTH_SHORT).show();
-
-            // Later:
-            // Intent i = new Intent(this, CustomerExploreActivity.class);
-            // i.putExtra("booking_provider_id", providerId);
-            // i.putExtra("booking_provider_name", providerName);
-            // startActivity(i);
-        });
+        btnNoInspo.setOnClickListener(v ->
+                Toast.makeText(this, "Explore flow next (Phase 1.5)", Toast.LENGTH_SHORT).show()
+        );
 
         btnContinue.setOnClickListener(v -> {
-            if (providerId == null) {
+            if (providerId == null || providerId.trim().isEmpty()) {
                 Toast.makeText(this, "Missing provider. Go back and select again.", Toast.LENGTH_LONG).show();
                 return;
             }
+
             if (currentUri == null) {
                 Toast.makeText(this, "Please upload a photo of your current nails.", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            // In Phase 1 we can allow inspo optional.
-            Intent next = new Intent(this, BookingBubblesActivity.class);
-            next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_ID, providerId);
-            next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_NAME, providerName);
-            next.putExtra(BookingBubblesActivity.EXTRA_CURRENT_URI, currentUri.toString());
-            if (inspoUri != null) next.putExtra(BookingBubblesActivity.EXTRA_INSPO_URI, inspoUri.toString());
-            startActivity(next);
+            uploadPhotosAndContinue(providerId, providerName);
         });
+    }
+
+    private void uploadPhotosAndContinue(String providerId, @Nullable String providerName) {
+        setContinueEnabled(false);
+        Toast.makeText(this, "Uploading photos...", Toast.LENGTH_SHORT).show();
+
+        SupabaseStorageUploader.uploadImage(
+                this,
+                currentUri,
+                "current",
+                new SupabaseStorageUploader.UploadCallback() {
+                    @Override
+                    public void onSuccess(String currentUrl) {
+                        if (inspoUri != null) {
+                            uploadInspoAndOpenNext(providerId, providerName, currentUrl);
+                        } else {
+                            runOnUiThread(() -> openNextScreen(providerId, providerName, currentUrl, null));
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message, @Nullable Throwable throwable) {
+                        runOnUiThread(() -> {
+                            setContinueEnabled(true);
+                            Toast.makeText(
+                                    BookingPhotosActivity.this,
+                                    "Failed to upload current photo.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        });
+                    }
+                }
+        );
+    }
+
+    private void uploadInspoAndOpenNext(String providerId, @Nullable String providerName, String currentUrl) {
+        SupabaseStorageUploader.uploadImage(
+                this,
+                inspoUri,
+                "inspo",
+                new SupabaseStorageUploader.UploadCallback() {
+                    @Override
+                    public void onSuccess(String inspoUrl) {
+                        runOnUiThread(() -> openNextScreen(providerId, providerName, currentUrl, inspoUrl));
+                    }
+
+                    @Override
+                    public void onError(String message, @Nullable Throwable throwable) {
+                        runOnUiThread(() -> {
+                            setContinueEnabled(true);
+                            Toast.makeText(
+                                    BookingPhotosActivity.this,
+                                    "Failed to upload inspo photo.",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        });
+                    }
+                }
+        );
+    }
+
+    private void openNextScreen(String providerId, @Nullable String providerName, String currentUrl, @Nullable String inspoUrl) {
+        setContinueEnabled(true);
+
+        Intent next = new Intent(this, BookingBubblesActivity.class);
+        next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_ID, providerId);
+        next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_NAME, providerName);
+
+        // These are now Supabase Storage URLs
+        next.putExtra(BookingBubblesActivity.EXTRA_CURRENT_URI, currentUrl);
+
+        if (inspoUrl != null) {
+            next.putExtra(BookingBubblesActivity.EXTRA_INSPO_URI, inspoUrl);
+        }
+
+        startActivity(next);
+    }
+
+    private void setContinueEnabled(boolean enabled) {
+        btnContinue.setEnabled(enabled);
+        btnContinue.setAlpha(enabled ? 1f : 0.6f);
     }
 }

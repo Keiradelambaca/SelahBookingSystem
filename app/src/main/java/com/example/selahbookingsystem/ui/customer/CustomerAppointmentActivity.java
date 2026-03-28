@@ -6,17 +6,16 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.adapter.CustomerAppointment;
+import com.example.selahbookingsystem.adapter.CustomerAppointmentsAdapter;
+import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
-import com.example.selahbookingsystem.data.store.TokenStore;
-import com.example.selahbookingsystem.data.dto.BookingDto;
-import com.example.selahbookingsystem.adapter.CustomerAppointmentsAdapter;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -41,9 +40,7 @@ public class CustomerAppointmentActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_appointments);
 
-        // Toolbar
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        // If you set app:title in XML you can remove the next line
         toolbar.setTitle("Appointments");
         setSupportActionBar(toolbar);
 
@@ -56,7 +53,7 @@ public class CustomerAppointmentActivity extends BaseActivity {
             Intent i = new Intent(this, CustomerAppointmentDetailActivity.class);
             i.putExtra(CustomerAppointmentDetailActivity.EXTRA_BOOKING_ID, appt.getId());
             startActivity(i);
-        });
+        }, false);
         rvAppointments.setAdapter(adapter);
 
         loadAppointments();
@@ -65,7 +62,7 @@ public class CustomerAppointmentActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadAppointments(); // refresh after changes/cancel etc.
+        loadAppointments();
     }
 
     private void loadAppointments() {
@@ -79,12 +76,12 @@ public class CustomerAppointmentActivity extends BaseActivity {
 
         SupabaseRestService rest = ApiClient.get().create(SupabaseRestService.class);
 
-        // ISO UTC like "2026-01-30T16:23:00Z"
         String nowIso = Instant.now().toString();
 
         String select =
                 "id,provider_id,provider_name,start_time,end_time,duration_mins,details_json," +
-                        "inspo_photo_url,current_photo_url,status,created_at";
+                        "inspo_photo_url,current_photo_url,status,created_at,total_price_cents," +
+                        "payment_status";
 
         Log.d(TAG, "Requesting bookings client=" + clientId + " start_time>= " + nowIso);
 
@@ -117,7 +114,7 @@ public class CustomerAppointmentActivity extends BaseActivity {
 
                     if (appt.getAppointmentStart() == null) {
                         Log.w(TAG, "NULL start_time for booking id=" + b.id + " raw=" + b.start_time);
-                        continue; // skip invalid
+                        continue;
                     }
 
                     upcomingAppointments.add(appt);
@@ -129,16 +126,11 @@ public class CustomerAppointmentActivity extends BaseActivity {
             @Override
             public void onFailure(retrofit2.Call<List<BookingDto>> call, Throwable t) {
                 Log.e(TAG, "API failure", t);
-                // keep existing list, but refresh empty state + notify
                 pruneSortAndRender();
             }
         });
     }
 
-    /**
-     * Keep ONLY future appointments, sort ascending, render.
-     * This is a safety net even though the API already asks for start_time >= now.
-     */
     private void pruneSortAndRender() {
         Instant now = Instant.now();
 
@@ -155,8 +147,6 @@ public class CustomerAppointmentActivity extends BaseActivity {
         upcomingAppointments.clear();
         upcomingAppointments.addAll(filtered);
 
-        Log.d(TAG, "After prune count=" + upcomingAppointments.size());
-
         boolean isEmpty = upcomingAppointments.isEmpty();
         emptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         rvAppointments.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
@@ -165,42 +155,77 @@ public class CustomerAppointmentActivity extends BaseActivity {
     }
 
     private CustomerAppointment mapBookingToAppointment(BookingDto b) {
-        Instant start = parseToInstant(b.start_time);
-
         CustomerAppointment a = new CustomerAppointment();
-        a.setId(b.id);
-        a.setProviderName(b.provider_name != null ? b.provider_name : "Provider");
-        a.setAppointmentStart(start);
-        a.setDurationMins(b.duration_mins != null ? b.duration_mins : 60);
 
-        // You can improve this later by pulling service name from details_json
+        a.setId(b.id);
+        a.setProviderName(
+                b.provider_name != null && !b.provider_name.trim().isEmpty()
+                        ? b.provider_name
+                        : "Provider"
+        );
+
+        a.setAppointmentStart(parseToInstant(b.start_time));
+        a.setDurationMins(b.duration_mins != null ? b.duration_mins : 60);
         a.setServiceTitle("Nail Appointment");
 
-        a.setBannerUrl(b.inspo_photo_url);
+        String banner =
+                (b.inspo_photo_url != null && !b.inspo_photo_url.trim().isEmpty())
+                        ? b.inspo_photo_url
+                        : b.current_photo_url;
+        a.setBannerUrl(banner);
+
         a.setLocationArea("Near you");
 
-        // Payment/status mapping (adjust to your real statuses)
-        if ("paid".equalsIgnoreCase(b.status)) {
-            a.setPaymentStatus(CustomerAppointment.PaymentStatus.PAID);
-        } else if ("deposit_paid".equalsIgnoreCase(b.status)) {
-            a.setPaymentStatus(CustomerAppointment.PaymentStatus.DEPOSIT_PAID);
-        } else if ("cash".equalsIgnoreCase(b.status)) {
-            a.setPaymentStatus(CustomerAppointment.PaymentStatus.PAY_BY_CASH);
-        } else {
-            a.setPaymentStatus(CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID);
+        double price = 0.0;
+        if (b.total_price_cents != null) {
+            price = b.total_price_cents / 100.0;
         }
+        a.setPrice(price);
+
+        a.setPaymentStatus(mapPaymentStatus(b.payment_status, b.status));
 
         return a;
     }
 
+    private CustomerAppointment.PaymentStatus mapPaymentStatus(String paymentStatus, String fallbackStatus) {
+        String value = paymentStatus;
+
+        if (value == null || value.trim().isEmpty()) {
+            value = fallbackStatus;
+        }
+
+        if (value == null) {
+            return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+        }
+
+        value = value.trim().toLowerCase();
+
+        if (value.equals("paid")) {
+            return CustomerAppointment.PaymentStatus.PAID;
+        }
+
+        if (value.equals("deposit_paid")) {
+            return CustomerAppointment.PaymentStatus.DEPOSIT_PAID;
+        }
+
+        if (value.equals("cash") || value.equals("pay_by_cash")) {
+            return CustomerAppointment.PaymentStatus.PAY_BY_CASH;
+        }
+
+        return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+    }
+
     private Instant parseToInstant(String iso) {
         if (iso == null) return null;
+
         try {
             return Instant.parse(iso);
         } catch (Exception ignored) { }
+
         try {
             return OffsetDateTime.parse(iso).toInstant();
         } catch (Exception ignored) { }
+
         return null;
     }
 
