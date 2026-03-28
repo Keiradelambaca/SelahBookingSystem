@@ -20,14 +20,13 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
+            app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@android:color/black"
             app:title="Services, prices + times"
             app:titleCentered="true"
-            app:titleTextColor="@android:color/black"
-            app:navigationIcon="@drawable/ic_back"
-            app:navigationIconTint="@android:color/black" />
+            app:titleTextColor="@android:color/black" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
@@ -45,11 +44,19 @@
                 android:id="@+id/tvHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="Your services"
+                android:layout_marginBottom="6dp"
+                android:text="Standard services"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:alpha="0.75"
+                android:text="Turn services on or off, then set your prices and timings. These power AI bookings and live estimates."
+                android:textColor="@android:color/black" />
 
             <ProgressBar
                 android:id="@+id/progress"
@@ -61,7 +68,6 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <!-- Empty state -->
             <LinearLayout
                 android:id="@+id/emptyState"
                 android:layout_width="match_parent"
@@ -69,13 +75,12 @@
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="24dp"
-                android:visibility="gone"
-                tools:visibility="gone">
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No services yet"
+                    android:text="No services found"
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -86,7 +91,7 @@
                     android:layout_marginTop="6dp"
                     android:alpha="0.75"
                     android:gravity="center"
-                    android:text="Add your first service to power pricing + timing in booking."
+                    android:text="Check that app services were seeded in Supabase."
                     android:textColor="@android:color/black" />
             </LinearLayout>
 
@@ -96,22 +101,10 @@
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
-                android:paddingBottom="96dp"
-                tools:itemCount="4"
-                tools:listitem="@android:layout/simple_list_item_2" />
-
+                android:paddingBottom="32dp"
+                tools:itemCount="6"
+                tools:listitem="@layout/item_sp_service_pricing" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <!-- FAB -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabAddService"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:text="Add service"
-        app:icon="@drawable/ic_plus"
-        app:elevation="6dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

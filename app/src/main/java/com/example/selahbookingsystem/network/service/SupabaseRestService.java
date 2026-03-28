@@ -1,11 +1,15 @@
 package com.example.selahbookingsystem.network.service;
 
+import com.example.selahbookingsystem.data.dto.AiBookingAssessmentResponse;
+import com.example.selahbookingsystem.data.dto.AppServiceDto;
 import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
+import com.example.selahbookingsystem.data.dto.ProviderServicePricingDto;
 import com.example.selahbookingsystem.data.dto.ServiceDto;
 import com.example.selahbookingsystem.data.dto.ServiceModifierDto;
 import com.example.selahbookingsystem.data.dto.EmailTemplateDto;
 import com.example.selahbookingsystem.data.dto.ProviderSettingsDto;
+import com.example.selahbookingsystem.data.model.AiBookingAssessmentRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -207,7 +211,6 @@ public interface SupabaseRestService {
         public String phone;
     }
 
-    // Booking row that includes the joined client profile
     class BookingWithClientDto {
         public String id;
         public String client_id;
@@ -215,8 +218,12 @@ public interface SupabaseRestService {
         public String status;
         public String start_time;
         public String end_time;
+        public String created_at;
 
-        // If your select uses: client:profiles(...)
+        public Integer duration_mins;
+        public String inspo_photo_url;
+        public String provider_name;
+
         public ProfileMiniDto client;
     }
 
@@ -229,9 +236,17 @@ public interface SupabaseRestService {
             @Query("order") String order                 // "start_time.desc"
     );
 
-    // =========================
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/bookings")
+    Call<List<BookingWithClientDto>> listConfirmedBookingsWithClientForRange(
+            @Query("provider_id") String providerIdEq,      // "eq.<providerId>"
+            @Query("status") String statusEq,               // "eq.confirmed"
+            @Query("start_time") List<String> startFilters, // ["gte.<ISO>", "lt.<ISO>"]
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
 // SP WEEKLY AVAILABILITY
-// =========================
     @Headers({"Accept: application/json"})
     @GET("rest/v1/sp_weekly_availability")
     Call<List<com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto>> listWeeklyAvailability(
@@ -265,9 +280,8 @@ public interface SupabaseRestService {
             @Query("id") String idEq // "eq.<id>"
     );
 
-    // =========================
+
 // SP DAILY AVAILABILITY
-// =========================
     @Headers({"Accept: application/json"})
     @GET("rest/v1/sp_daily_availability")
     Call<List<com.example.selahbookingsystem.data.dto.DailyAvailabilityDto>> listDailyAvailabilityForDate(
@@ -313,10 +327,7 @@ public interface SupabaseRestService {
             @Body com.example.selahbookingsystem.data.dto.WeeklyAvailabilityDto body
     );
 
-
-    // =========================
-// BOOKINGS: get provider bookings within day (exclude times)
-// =========================
+// BOOKINGS: get provider bookings within day
     @Headers({"Accept: application/json"})
     @GET("rest/v1/bookings")
     Call<List<com.example.selahbookingsystem.data.dto.BookingDto>> listBookingsForProviderBetween(
@@ -360,17 +371,14 @@ public interface SupabaseRestService {
             @Body Map<String, Object> body
     );
 
-// =========================
 // SERVICE MODIFIERS (bubbles)
-// =========================
 
     @Headers({"Accept: application/json"})
     @GET("rest/v1/service_modifiers")
     Call<List<ServiceModifierDto>> listModifiersForService(
-            @Query("service_id") String serviceIdEq, // "eq.<serviceId>"
-            @Query("is_active") String isActiveEq,   // "eq.true"
-            @Query("order") String order,            // "created_at.asc" (add column if you want)
-            @Query("select") String select           // "id,service_id,label,price_delta_cents,duration_delta_mins,kind,is_default,is_active"
+            @Query("service_id") String serviceIdEq,
+            @Query("is_active") String isActiveEq,
+            @Query("select") String select
     );
 
     @Headers({
@@ -390,10 +398,7 @@ public interface SupabaseRestService {
             @Body Map<String, Object> body
     );
 
-
-    // =========================
 // AUTO EMAIL TEMPLATES
-// =========================
 
     // GET /rest/v1/email_templates?provider_id=eq.<uid>&select=...
     @Headers({"Accept: application/json"})
@@ -403,11 +408,6 @@ public interface SupabaseRestService {
             @Query("select") String select
     );
 
-    /**
-     * Upsert templates (insert if missing, update if exists based on unique(provider_id,type))
-     * POST /rest/v1/email_templates?on_conflict=provider_id,type
-     * Headers: Prefer: resolution=merge-duplicates, return=representation
-     */
     @Headers({
             "Content-Type: application/json",
             "Prefer: resolution=merge-duplicates, return=representation"
@@ -467,6 +467,41 @@ public interface SupabaseRestService {
     @POST("rest/v1/provider_settings")
     Call<List<ProviderSettingsDto>> upsertProviderSettings(@Body Map<String, Object> body);
 
+
+    @Headers({
+            "Content-Type: application/json",
+            "Accept: application/json"
+    })
+    @POST("functions/v1/analyse-nail-booking")
+    Call<AiBookingAssessmentResponse> analyseNailBooking(
+            @Body AiBookingAssessmentRequest body
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/app_services")
+    Call<List<AppServiceDto>> listAppServices(
+            @Query("is_active") String isActiveEq,
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+    @Headers({"Accept: application/json"})
+    @GET("rest/v1/provider_service_pricing_view")
+    Call<List<ProviderServicePricingDto>> getProviderServicePricing(
+            @Query("provider_id") String providerIdEq,
+            @Query("select") String select,
+            @Query("order") String order
+    );
+
+    @Headers({
+            "Content-Type: application/json",
+            "Prefer: resolution=merge-duplicates, return=representation"
+    })
+    @POST("rest/v1/provider_service_pricing")
+    Call<List<ProviderServicePricingDto>> upsertProviderServicePricing(
+            @Query("on_conflict") String onConflict,
+            @Body List<Map<String, Object>> body
+    );
 
 
 }

@@ -3,6 +3,8 @@ package com.example.selahbookingsystem.network.api;
 import android.content.Context;
 
 import com.example.selahbookingsystem.data.store.TokenStore;
+import com.example.selahbookingsystem.network.api.ServicesApi;
+import com.example.selahbookingsystem.network.service.SupabaseRestService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,8 +14,6 @@ import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import com.example.selahbookingsystem.network.api.ServicesApi;
-
 
 public class ApiClient {
 
@@ -63,7 +63,7 @@ public class ApiClient {
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(SUPABASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create()) 
+                    .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build();
         }
@@ -78,5 +78,15 @@ public class ApiClient {
         return get().create(ServicesApi.class);
     }
 
+    public static SupabaseRestService supabase() {
+        return get().create(SupabaseRestService.class);
+    }
 
+    public static String getSupabaseUrl() {
+        return SUPABASE_URL;
+    }
+
+    public static String getSupabaseAnonKey() {
+        return SUPABASE_ANON_KEY;
+    }
 }

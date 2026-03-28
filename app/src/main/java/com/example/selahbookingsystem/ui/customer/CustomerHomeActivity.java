@@ -2,7 +2,7 @@ package com.example.selahbookingsystem.ui.customer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -13,12 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.adapter.CustomerAppointment;
 import com.example.selahbookingsystem.adapter.CustomerAppointmentsAdapter;
+import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
-import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
-import com.example.selahbookingsystem.data.store.TokenStore;
-import com.google.android.material.appbar.MaterialToolbar;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -34,7 +33,6 @@ public class CustomerHomeActivity extends BaseActivity {
 
     private TextView titleText;
     private Button bookButton;
-
     private RecyclerView appointmentsRecycler;
 
     private final List<CustomerAppointment> upcoming = new ArrayList<>();
@@ -49,36 +47,91 @@ public class CustomerHomeActivity extends BaseActivity {
         bookButton = findViewById(R.id.bookButton);
         appointmentsRecycler = findViewById(R.id.appointmentsRecycler);
 
-        // Optional: personalize greeting if name is elsewhere
         titleText.setText("Hey Customer,");
 
-        // Recycler setup
         appointmentsRecycler.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CustomerAppointmentsAdapter(this, upcoming, appt -> {
-            Intent i = new Intent(this, CustomerAppointmentDetailActivity.class);
-            i.putExtra(CustomerAppointmentDetailActivity.EXTRA_BOOKING_ID, appt.getId());
-            startActivity(i);
-        });
+        adapter = new CustomerAppointmentsAdapter(
+                this,
+                upcoming,
+                appt -> {
+                    Intent i = new Intent(this, CustomerAppointmentDetailActivity.class);
+                    i.putExtra(CustomerAppointmentDetailActivity.EXTRA_BOOKING_ID, appt.getId());
+                    startActivity(i);
+                },
+                true
+        );
         appointmentsRecycler.setAdapter(adapter);
 
-        // Book button -> booking flow screen
         bookButton.setOnClickListener(v -> {
             Intent i = new Intent(this, SelectProviderActivity.class);
             pickProviderLauncher.launch(i);
         });
 
-
+        loadCustomerName();
         loadUpcomingPreview();
-
-        android.util.Log.e("NAV", "CustomerHomeActivity opened! stack=",
-                new RuntimeException("Opened CustomerHomeActivity"));
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        loadCustomerName();
         loadUpcomingPreview();
+    }
+
+    private void loadCustomerName() {
+        String userId = TokenStore.getUserId(this);
+
+        if (TextUtils.isEmpty(userId)) {
+            titleText.setText("Hey Customer,");
+            return;
+        }
+
+        SupabaseRestService rest = ApiClient.get().create(SupabaseRestService.class);
+
+        rest.getProfile(
+                "eq." + userId,
+                "id,full_name"
+        ).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
+            @Override
+            public void onResponse(Call<List<SupabaseRestService.ProfileDto>> call,
+                                   Response<List<SupabaseRestService.ProfileDto>> response) {
+
+                if (!response.isSuccessful() || response.body() == null || response.body().isEmpty()) {
+                    titleText.setText("Hey Customer,");
+                    return;
+                }
+
+                SupabaseRestService.ProfileDto profile = response.body().get(0);
+
+                String fullName = profile.full_name;
+                if (TextUtils.isEmpty(fullName)) {
+                    titleText.setText("Hey Customer,");
+                    return;
+                }
+
+                String firstName = extractFirstName(fullName);
+                titleText.setText("Hey " + firstName + ",");
+            }
+
+            @Override
+            public void onFailure(Call<List<SupabaseRestService.ProfileDto>> call, Throwable t) {
+                titleText.setText("Hey Customer,");
+            }
+        });
+    }
+
+    private String extractFirstName(String fullName) {
+        if (fullName == null) return "Customer";
+
+        String trimmed = fullName.trim();
+        if (trimmed.isEmpty()) return "Customer";
+
+        int firstSpace = trimmed.indexOf(' ');
+        if (firstSpace == -1) {
+            return trimmed;
+        }
+
+        return trimmed.substring(0, firstSpace);
     }
 
     private void loadUpcomingPreview() {
@@ -96,9 +149,9 @@ public class CustomerHomeActivity extends BaseActivity {
 
         String select =
                 "id,provider_id,provider_name,start_time,end_time,duration_mins," +
-                        "details_json,inspo_photo_url,current_photo_url,status,created_at";
+                        "details_json,inspo_photo_url,current_photo_url,status,created_at," +
+                        "total_price_cents,payment_status";
 
-        // show next 3 on home
         rest.listUpcomingBookingsForClientLimited(
                 "eq." + clientId,
                 "gte." + nowIso,
@@ -112,7 +165,10 @@ public class CustomerHomeActivity extends BaseActivity {
 
                 if (resp.isSuccessful() && resp.body() != null) {
                     for (BookingDto b : resp.body()) {
-                        upcoming.add(mapBookingToAppointment(b));
+                        CustomerAppointment mapped = mapBookingToAppointment(b);
+                        if (mapped.getAppointmentStart() != null) {
+                            upcoming.add(mapped);
+                        }
                     }
                 }
 
@@ -122,7 +178,6 @@ public class CustomerHomeActivity extends BaseActivity {
 
             @Override
             public void onFailure(Call<List<BookingDto>> call, Throwable t) {
-                // keep list empty / show whatever last loaded
                 upcoming.clear();
                 adapter.notifyDataSetChanged();
             }
@@ -139,39 +194,60 @@ public class CustomerHomeActivity extends BaseActivity {
         CustomerAppointment a = new CustomerAppointment();
 
         a.setId(b.id);
-        a.setProviderName(b.provider_name != null ? b.provider_name : "Provider");
+
+        a.setProviderName(
+                !TextUtils.isEmpty(b.provider_name)
+                        ? b.provider_name
+                        : "Provider"
+        );
+
         a.setAppointmentStart(parseToInstant(b.start_time));
-
         a.setDurationMins(b.duration_mins != null ? b.duration_mins : 60);
-
-        // no service title column yet
         a.setServiceTitle("Nail Appointment");
 
-        // Use inspo image first; fallback to current photo
         String banner =
-                (b.inspo_photo_url != null && !b.inspo_photo_url.isEmpty())
+                !TextUtils.isEmpty(b.inspo_photo_url)
                         ? b.inspo_photo_url
                         : b.current_photo_url;
-
         a.setBannerUrl(banner);
 
         a.setLocationArea("Near you");
 
-        a.setPaymentStatus(mapPaymentStatus(b.status));
+        double price = 0.0;
+        if (b.total_price_cents != null) {
+            price = b.total_price_cents / 100.0;
+        }
+        a.setPrice(price);
 
-        // price isn’t in booking columns yet
-        a.setPrice(0);
+        a.setPaymentStatus(mapPaymentStatus(b.payment_status, b.status));
 
         return a;
     }
 
-    private CustomerAppointment.PaymentStatus mapPaymentStatus(String status) {
-        if (status == null) return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+    private CustomerAppointment.PaymentStatus mapPaymentStatus(String paymentStatus, String fallbackStatus) {
+        String value = paymentStatus;
 
-        if ("paid".equalsIgnoreCase(status)) return CustomerAppointment.PaymentStatus.PAID;
-        if ("deposit_paid".equalsIgnoreCase(status)) return CustomerAppointment.PaymentStatus.DEPOSIT_PAID;
-        if ("cash".equalsIgnoreCase(status) || "pay_by_cash".equalsIgnoreCase(status))
+        if (TextUtils.isEmpty(value)) {
+            value = fallbackStatus;
+        }
+
+        if (TextUtils.isEmpty(value)) {
+            return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
+        }
+
+        value = value.trim().toLowerCase();
+
+        if ("paid".equals(value)) {
+            return CustomerAppointment.PaymentStatus.PAID;
+        }
+
+        if ("deposit_paid".equals(value)) {
+            return CustomerAppointment.PaymentStatus.DEPOSIT_PAID;
+        }
+
+        if ("cash".equals(value) || "pay_by_cash".equals(value)) {
             return CustomerAppointment.PaymentStatus.PAY_BY_CASH;
+        }
 
         return CustomerAppointment.PaymentStatus.DEPOSIT_NOT_PAID;
     }
@@ -179,17 +255,20 @@ public class CustomerHomeActivity extends BaseActivity {
     private Instant parseToInstant(String iso) {
         if (iso == null) return null;
 
-        // Handles "2026-01-29T14:30:00Z"
-        try { return Instant.parse(iso); } catch (Exception ignored) {}
+        try {
+            return Instant.parse(iso);
+        } catch (Exception ignored) { }
 
-        // Handles "2026-01-29T14:30:00+00:00"
-        try { return OffsetDateTime.parse(iso).toInstant(); } catch (Exception ignored) {}
+        try {
+            return OffsetDateTime.parse(iso).toInstant();
+        } catch (Exception ignored) { }
 
         return null;
     }
 
     private final androidx.activity.result.ActivityResultLauncher<Intent> pickProviderLauncher =
-            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+            registerForActivityResult(
+                    new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() != RESULT_OK || result.getData() == null) return;
 
@@ -202,10 +281,8 @@ public class CustomerHomeActivity extends BaseActivity {
                         startActivity(next);
                     });
 
-
     @Override
     protected int getBottomNavMenuItemId() {
         return R.id.nav_home;
     }
 }
-

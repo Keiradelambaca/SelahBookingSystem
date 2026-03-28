@@ -25,6 +25,8 @@ public class BookingDto {
     @Nullable public String payment_status; // not_required, requires_payment, paid etc
     @Nullable public String payment_provider; // stripe
     @Nullable public String payment_ref; //checkout_session_id
+    @Nullable public String client_name;
+    @Nullable public String service_name;
 
 }
 
