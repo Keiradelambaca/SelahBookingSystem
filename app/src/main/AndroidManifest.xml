@@ -63,8 +63,6 @@
 
         <activity android:name=".ui.customer.CustomerProfileActivity" />
 
-
-        <activity android:name=".ui.customer.CustomerExploreActivity" />
         <activity
             android:name=".ui.customer.CustomerLikedLooksActivity"
             android:exported="false"/>

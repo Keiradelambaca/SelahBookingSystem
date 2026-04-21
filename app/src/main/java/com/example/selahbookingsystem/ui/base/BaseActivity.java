@@ -1,10 +1,7 @@
 package com.example.selahbookingsystem.ui.base;
 
 import android.content.Intent;
-import android.os.Bundle;
-
 import androidx.annotation.IdRes;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.LayoutInflater;
@@ -12,7 +9,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.selahbookingsystem.ui.customer.CustomerAppointmentActivity;
-import com.example.selahbookingsystem.ui.customer.CustomerExploreActivity;
 import com.example.selahbookingsystem.ui.customer.CustomerHomeActivity;
 import com.example.selahbookingsystem.ui.customer.CustomerMessagesActivity;
 import com.example.selahbookingsystem.ui.customer.CustomerProfileActivity;
@@ -42,7 +38,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottomNav);
         if (bottomNav == null) return;
 
-        // highlight correct item WITHOUT firing navigation
         bottomNav.setOnItemSelectedListener(null);
         bottomNav.setSelectedItemId(getBottomNavMenuItemId());
 
@@ -52,11 +47,15 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (id == getBottomNavMenuItemId()) return true;
             Intent intent = null;
 
-            if (id == R.id.nav_home) intent = new Intent(this, CustomerHomeActivity.class);
-            else if (id == R.id.nav_appointments) intent = new Intent(this, CustomerAppointmentActivity.class);
-            else if (id == R.id.nav_explore) intent = new Intent(this, CustomerExploreActivity.class);
-            else if (id == R.id.nav_messages) intent = new Intent(this, CustomerMessagesActivity.class);
-            else if (id == R.id.nav_profile) intent = new Intent(this, CustomerProfileActivity.class);
+            if (id == R.id.nav_home) {
+                intent = new Intent(this, CustomerHomeActivity.class);
+            } else if (id == R.id.nav_appointments) {
+                intent = new Intent(this, CustomerAppointmentActivity.class);
+            } else if (id == R.id.nav_messages) {
+                intent = new Intent(this, CustomerMessagesActivity.class);
+            } else if (id == R.id.nav_profile) {
+                intent = new Intent(this, CustomerProfileActivity.class);
+            }
 
             if (intent != null) {
                 startActivity(intent);
