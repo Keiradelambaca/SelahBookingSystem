@@ -46,6 +46,8 @@ public class BookingBubblesActivity extends AppCompatActivity
     public static final String EXTRA_SERVICE_ID = "extra_service_id";
     public static final String EXTRA_TOTAL_PRICE_CENTS = "extra_total_price_cents";
 
+    private static final String TAG = "BookingBubbles";
+
     private ChipGroup chipGroup;
     private TextView tvEstimated;
 
@@ -55,8 +57,10 @@ public class BookingBubblesActivity extends AppCompatActivity
 
     private PriceEstimateDto currentEstimate = new PriceEstimateDto();
 
-    private String providerId, providerName;
-    private String currentUriStr, inspoUriStr;
+    private String providerId;
+    private String providerName;
+    private String currentUriStr;
+    private String inspoUriStr;
 
     private boolean aiLoaded = false;
     private boolean aiLoading = false;
@@ -99,8 +103,8 @@ public class BookingBubblesActivity extends AppCompatActivity
         });
 
         btnContinue.setOnClickListener(v -> {
-            if (providerId == null || providerId.trim().isEmpty() ||
-                    currentUriStr == null || currentUriStr.trim().isEmpty()) {
+            if (providerId == null || providerId.trim().isEmpty()
+                    || currentUriStr == null || currentUriStr.trim().isEmpty()) {
                 Toast.makeText(this, "Missing booking info. Go back.", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -124,7 +128,8 @@ public class BookingBubblesActivity extends AppCompatActivity
             i.putExtra(PickTimeslotActivity.EXTRA_PROVIDER_ID, providerId);
             i.putExtra(PickTimeslotActivity.EXTRA_PROVIDER_NAME, providerName);
             i.putExtra(PickTimeslotActivity.EXTRA_CURRENT_URI, currentUriStr);
-            if (inspoUriStr != null) {
+
+            if (inspoUriStr != null && !inspoUriStr.trim().isEmpty()) {
                 i.putExtra(PickTimeslotActivity.EXTRA_INSPO_URI, inspoUriStr);
             }
 
@@ -132,10 +137,10 @@ public class BookingBubblesActivity extends AppCompatActivity
             i.putExtra(PickTimeslotActivity.EXTRA_EST_MINS, currentEstimate.total_duration_mins);
             i.putExtra(PickTimeslotActivity.EXTRA_TOTAL_PRICE_CENTS, currentEstimate.total_price_cents);
 
-            Log.d("BookingBubbles", "currentUrl=" + currentUriStr);
-            Log.d("BookingBubbles", "inspoUrl=" + inspoUriStr);
-            Log.d("BookingBubbles", "totalPriceCents=" + currentEstimate.total_price_cents);
-            Log.d("BookingBubbles", "totalDurationMins=" + currentEstimate.total_duration_mins);
+            Log.d(TAG, "currentUrl=" + currentUriStr);
+            Log.d(TAG, "inspoUrl=" + inspoUriStr);
+            Log.d(TAG, "totalPriceCents=" + currentEstimate.total_price_cents);
+            Log.d(TAG, "totalDurationMins=" + currentEstimate.total_duration_mins);
 
             startActivity(i);
         });
@@ -165,9 +170,11 @@ public class BookingBubblesActivity extends AppCompatActivity
 
                         if (!response.isSuccessful() || response.body() == null) {
                             Log.e("PRICING", "Failed to load provider pricing: HTTP " + response.code());
-                            Toast.makeText(BookingBubblesActivity.this,
+                            Toast.makeText(
+                                    BookingBubblesActivity.this,
                                     "Failed to load provider pricing",
-                                    Toast.LENGTH_SHORT).show();
+                                    Toast.LENGTH_SHORT
+                            ).show();
                             return;
                         }
 
@@ -176,7 +183,6 @@ public class BookingBubblesActivity extends AppCompatActivity
                         pricingLoaded = true;
 
                         Log.d("PRICING", "Loaded provider pricing rows=" + providerPricing.size());
-
                         recalculateEstimate();
                     }
 
@@ -184,9 +190,11 @@ public class BookingBubblesActivity extends AppCompatActivity
                     public void onFailure(Call<List<ProviderServicePricingDto>> call, Throwable t) {
                         pricingLoading = false;
                         Log.e("PRICING", "Provider pricing call failed", t);
-                        Toast.makeText(BookingBubblesActivity.this,
+                        Toast.makeText(
+                                BookingBubblesActivity.this,
                                 "Network error loading provider pricing",
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_SHORT
+                        ).show();
                     }
                 });
     }
@@ -206,7 +214,11 @@ public class BookingBubblesActivity extends AppCompatActivity
 
         String inspoForRequest = (inspoUriStr != null && !inspoUriStr.trim().isEmpty())
                 ? inspoUriStr
-                : currentUriStr;
+                : null;
+
+        Log.d("AI_BOOKING", "providerId=" + providerId);
+        Log.d("AI_BOOKING", "current_photo_url=" + currentUriStr);
+        Log.d("AI_BOOKING", "inspo_photo_url=" + inspoForRequest);
 
         aiLoading = true;
         Toast.makeText(this, "Analysing nail photos...", Toast.LENGTH_SHORT).show();
@@ -222,8 +234,16 @@ public class BookingBubblesActivity extends AppCompatActivity
                                            Response<AiBookingAssessmentResponse> response) {
                         aiLoading = false;
 
+                        Log.d("AI_BOOKING", "HTTP code=" + response.code());
+                        Log.d("AI_BOOKING", "HTTP success=" + response.isSuccessful());
+
                         if (!response.isSuccessful() || response.body() == null) {
                             Log.e("AI_BOOKING", "AI response failed: HTTP " + response.code());
+                            Toast.makeText(
+                                    BookingBubblesActivity.this,
+                                    "AI analysis failed. You can still edit the bubbles manually.",
+                                    Toast.LENGTH_LONG
+                            ).show();
                             return;
                         }
 
@@ -231,7 +251,6 @@ public class BookingBubblesActivity extends AppCompatActivity
                         aiLoaded = true;
 
                         Log.d("AI_BOOKING", "assessment_id=" + ai.assessment_id);
-
                         applyAiAssessment(ai);
                     }
 
@@ -239,11 +258,16 @@ public class BookingBubblesActivity extends AppCompatActivity
                     public void onFailure(Call<AiBookingAssessmentResponse> call, Throwable t) {
                         aiLoading = false;
                         Log.e("AI_BOOKING", "AI call failed", t);
+                        Toast.makeText(
+                                BookingBubblesActivity.this,
+                                "Could not analyse images. You can still edit the bubbles manually.",
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
                 });
     }
 
-    private void applyAiAssessment(AiBookingAssessmentResponse ai) {
+    private void applyAiAssessment(@Nullable AiBookingAssessmentResponse ai) {
         if (ai == null) return;
 
         boolean appliedStructured = applyStructuredAnalysis(ai.analysis);
@@ -269,8 +293,9 @@ public class BookingBubblesActivity extends AppCompatActivity
             changed = true;
         }
 
-        if (analysis.addon_codes != null && !analysis.addon_codes.isEmpty()) {
+        if (analysis.addon_codes != null) {
             editableSelection.clearAddons();
+
             for (String code : analysis.addon_codes) {
                 if (code != null && !code.trim().isEmpty()) {
                     editableSelection.addAddon(normalizeCode(code));
@@ -292,6 +317,12 @@ public class BookingBubblesActivity extends AppCompatActivity
         if (analysis.length != null && !analysis.length.trim().isEmpty()) {
             editableSelection.length = normalizeValue(analysis.length);
             changed = true;
+        }
+
+        if ("xl".equalsIgnoreCase(editableSelection.length)) {
+            editableSelection.addAddon("extra_length");
+        } else {
+            editableSelection.removeAddon("extra_length");
         }
 
         return changed;
@@ -356,14 +387,17 @@ public class BookingBubblesActivity extends AppCompatActivity
 
                 case "LENGTH_SHORT":
                     editableSelection.length = "short";
+                    editableSelection.removeAddon("extra_length");
                     break;
 
                 case "LENGTH_MEDIUM":
                     editableSelection.length = "medium";
+                    editableSelection.removeAddon("extra_length");
                     break;
 
                 case "LENGTH_LONG":
                     editableSelection.length = "long";
+                    editableSelection.removeAddon("extra_length");
                     break;
 
                 case "LENGTH_EXTRA_LONG":
@@ -397,7 +431,7 @@ public class BookingBubblesActivity extends AppCompatActivity
     private void rebuildSelectionsMap() {
         selections.clear();
 
-        if (editableSelection.baseServiceCode != null) {
+        if (editableSelection.baseServiceCode != null && !editableSelection.baseServiceCode.trim().isEmpty()) {
             selections.put("Service", friendlyServiceName(editableSelection.baseServiceCode));
         }
 
@@ -416,6 +450,7 @@ public class BookingBubblesActivity extends AppCompatActivity
         if (editableSelection.addonCodes != null) {
             int counter = 1;
             for (String addonCode : editableSelection.addonCodes) {
+                if (addonCode == null || addonCode.trim().isEmpty()) continue;
                 selections.put("Add-on " + counter, friendlyServiceName(addonCode));
                 counter++;
             }
@@ -455,6 +490,7 @@ public class BookingBubblesActivity extends AppCompatActivity
 
         if ("Length".equals(category)) {
             editableSelection.length = null;
+            editableSelection.removeAddon("extra_length");
             return;
         }
 
@@ -486,19 +522,18 @@ public class BookingBubblesActivity extends AppCompatActivity
         String timeText = prettyDuration(currentEstimate.total_duration_mins);
         String priceText = formatEuro(currentEstimate.total_price_cents);
 
-        if (!currentEstimate.missing_service_codes.isEmpty()) {
-            tvEstimated.setText("Estimated: " + timeText + " • " + priceText +
-                    "\nSome selected items are not offered by this provider");
+        if (currentEstimate.missing_service_codes != null && !currentEstimate.missing_service_codes.isEmpty()) {
+            tvEstimated.setText(
+                    "Estimated: " + timeText + " • " + priceText +
+                            "\nSome selected items are not offered by this provider"
+            );
         } else {
             tvEstimated.setText("Estimated: " + timeText + " • " + priceText);
         }
     }
 
     @Override
-    public void onAddOnSelected(String category,
-                                String value,
-                                @Nullable String selectedCode) {
-
+    public void onAddOnSelected(String category, String value, @Nullable String selectedCode) {
         if (category == null || value == null) return;
 
         switch (category) {
@@ -516,9 +551,10 @@ public class BookingBubblesActivity extends AppCompatActivity
 
             case "Length":
                 editableSelection.length = normalizeValue(value);
-
                 if ("xl".equalsIgnoreCase(editableSelection.length)) {
                     editableSelection.addAddon("extra_length");
+                } else {
+                    editableSelection.removeAddon("extra_length");
                 }
                 break;
 
@@ -535,7 +571,8 @@ public class BookingBubblesActivity extends AppCompatActivity
     public static String serializeSelections(LinkedHashMap<String, String> map) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> e : map.entrySet()) {
-            sb.append(e.getKey()).append("=")
+            sb.append(e.getKey())
+                    .append("=")
                     .append(e.getValue() == null ? "" : e.getValue().replace(";", ","))
                     .append(";");
         }
@@ -574,6 +611,7 @@ public class BookingBubblesActivity extends AppCompatActivity
 
     private String friendlyValue(@Nullable String value) {
         if (value == null || value.trim().isEmpty()) return "";
+
         String[] parts = value.replace("_", " ").split(" ");
         StringBuilder sb = new StringBuilder();
 
