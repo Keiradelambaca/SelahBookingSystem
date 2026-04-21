@@ -27,6 +27,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
+import android.os.Build;
+
 public class SupabaseStorageUploader {
 
     private static final String TAG = "StorageUploader";
@@ -46,6 +51,7 @@ public class SupabaseStorageUploader {
     ) {
         String accessToken = TokenStore.getAccessToken(context);
         if (accessToken == null || accessToken.trim().isEmpty()) {
+            Log.e(TAG, "uploadImage: missing access token");
             callback.onError("Missing access token", null);
             return;
         }
@@ -56,22 +62,58 @@ public class SupabaseStorageUploader {
 
         try {
             ContentResolver resolver = context.getContentResolver();
-            mimeType = resolver.getType(imageUri);
-            if (mimeType == null || mimeType.trim().isEmpty()) {
+
+            Log.d(TAG, "uploadImage: selected imageUri=" + imageUri);
+
+            String detectedMimeType = resolver.getType(imageUri);
+            if (detectedMimeType == null || detectedMimeType.trim().isEmpty()) {
+                detectedMimeType = "image/jpeg";
+            }
+
+            Log.d(TAG, "uploadImage: detectedMimeType=" + detectedMimeType);
+
+            boolean supportedDirectly =
+                    "image/jpeg".equalsIgnoreCase(detectedMimeType) ||
+                            "image/png".equalsIgnoreCase(detectedMimeType) ||
+                            "image/gif".equalsIgnoreCase(detectedMimeType) ||
+                            "image/webp".equalsIgnoreCase(detectedMimeType);
+
+            if (supportedDirectly) {
+                mimeType = detectedMimeType;
+
+                extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+                if (extension == null || extension.trim().isEmpty()) {
+                    extension = "jpg";
+                }
+
+                bytes = readAllBytes(resolver, imageUri);
+                if (bytes == null || bytes.length == 0) {
+                    Log.e(TAG, "uploadImage: selected image is empty");
+                    callback.onError("Selected image is empty", null);
+                    return;
+                }
+
+                Log.d(TAG, "uploadImage: using original bytes");
+            } else {
+                Log.d(TAG, "uploadImage: unsupported source mimeType, converting to JPEG");
+
+                bytes = convertUriToJpegBytes(context, imageUri);
                 mimeType = "image/jpeg";
-            }
-
-            extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-            if (extension == null || extension.trim().isEmpty()) {
                 extension = "jpg";
+
+                if (bytes == null || bytes.length == 0) {
+                    Log.e(TAG, "uploadImage: JPEG conversion returned empty bytes");
+                    callback.onError("Failed to convert selected image to JPEG", null);
+                    return;
+                }
             }
 
-            bytes = readAllBytes(resolver, imageUri);
-            if (bytes == null || bytes.length == 0) {
-                callback.onError("Selected image is empty", null);
-                return;
-            }
+            Log.d(TAG, "uploadImage: final mimeType=" + mimeType);
+            Log.d(TAG, "uploadImage: final extension=" + extension);
+            Log.d(TAG, "uploadImage: bytes.length=" + bytes.length);
+
         } catch (Exception e) {
+            Log.e(TAG, "uploadImage: failed to read/convert selected image", e);
             callback.onError("Failed to read selected image", e);
             return;
         }
@@ -89,6 +131,16 @@ public class SupabaseStorageUploader {
                 + BUCKET_NAME
                 + "/"
                 + objectPath;
+
+        String publicUrl = ApiClient.getSupabaseUrl()
+                + "/storage/v1/object/public/"
+                + BUCKET_NAME
+                + "/"
+                + objectPath;
+
+        Log.d(TAG, "uploadImage: objectPath=" + objectPath);
+        Log.d(TAG, "uploadImage: uploadUrl=" + uploadUrl);
+        Log.d(TAG, "uploadImage: publicUrl=" + publicUrl);
 
         RequestBody requestBody = RequestBody.create(
                 bytes,
@@ -111,6 +163,7 @@ public class SupabaseStorageUploader {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, "uploadImage: upload request failed", e);
                 callback.onError("Upload failed", e);
             }
 
@@ -118,21 +171,64 @@ public class SupabaseStorageUploader {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String body = response.body() != null ? response.body().string() : "";
 
+                Log.d(TAG, "uploadImage: upload response code=" + response.code());
+                Log.d(TAG, "uploadImage: upload response body=" + body);
+
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "Upload failed code=" + response.code() + " body=" + body);
+                    Log.e(TAG, "uploadImage: upload failed code=" + response.code() + " body=" + body);
                     callback.onError("Upload failed: " + response.code(), null);
                     return;
                 }
 
-                String publicUrl = ApiClient.getSupabaseUrl()
-                        + "/storage/v1/object/public/"
-                        + BUCKET_NAME
-                        + "/"
-                        + objectPath;
-
+                Log.d(TAG, "uploadImage: upload success, returning publicUrl=" + publicUrl);
                 callback.onSuccess(publicUrl);
             }
         });
+    }
+
+    private static byte[] convertUriToJpegBytes(@NonNull Context context, @NonNull Uri uri) throws IOException {
+        Bitmap bitmap = null;
+        IOException lastError = null;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            try {
+                ImageDecoder.Source source = ImageDecoder.createSource(context.getContentResolver(), uri);
+                bitmap = ImageDecoder.decodeBitmap(source);
+            } catch (IOException e) {
+                Log.e(TAG, "convertUriToJpegBytes: ImageDecoder failed", e);
+                lastError = e;
+            }
+        }
+
+        if (bitmap == null) {
+            try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+                if (inputStream == null) {
+                    throw new IOException("Could not open input stream for JPEG conversion");
+                }
+                bitmap = BitmapFactory.decodeStream(inputStream);
+            } catch (IOException e) {
+                Log.e(TAG, "convertUriToJpegBytes: BitmapFactory decode failed", e);
+                if (lastError == null) {
+                    lastError = e;
+                }
+            }
+        }
+
+        if (bitmap == null) {
+            throw new IOException(
+                    "Failed to decode image for JPEG conversion. The selected image may be an unsupported HEIF/HEIC variant on this emulator.",
+                    lastError
+            );
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean compressed = bitmap.compress(Bitmap.CompressFormat.JPEG, 92, outputStream);
+
+        if (!compressed) {
+            throw new IOException("Failed to compress image as JPEG");
+        }
+
+        return outputStream.toByteArray();
     }
 
     private static byte[] readAllBytes(ContentResolver resolver, Uri uri) throws IOException {

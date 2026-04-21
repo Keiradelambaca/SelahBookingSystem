@@ -140,9 +140,20 @@ public class BookingPhotosActivity extends BaseActivity {
                     public void onError(String message, @Nullable Throwable throwable) {
                         runOnUiThread(() -> {
                             setContinueEnabled(true);
+
+                            String friendlyMessage = "Failed to upload inspo photo.";
+
+                            if (throwable != null && throwable.getMessage() != null) {
+                                String errorText = throwable.getMessage().toLowerCase();
+
+                                if (errorText.contains("heif") || errorText.contains("heic") || errorText.contains("decode")) {
+                                    friendlyMessage = "That inspiration image format is not supported on this emulator. Please choose a JPG or PNG image.";
+                                }
+                            }
+
                             Toast.makeText(
                                     BookingPhotosActivity.this,
-                                    "Failed to upload inspo photo.",
+                                    friendlyMessage,
                                     Toast.LENGTH_LONG
                             ).show();
                         });
