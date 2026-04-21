@@ -7,11 +7,6 @@
         android:title="Profile"/>
 
     <item
-        android:id="@+id/nav_appointments"
-        android:icon="@drawable/calendar_icon"
-        android:title="Bookings"/>
-
-    <item
         android:id="@+id/nav_home"
         android:icon="@drawable/home_icon"
         android:title="Home"/>

@@ -63,17 +63,8 @@
 
         <activity android:name=".ui.customer.CustomerProfileActivity" />
 
-        <activity
-            android:name=".ui.customer.CustomerLikedLooksActivity"
-            android:exported="false"/>
-
-
         <activity android:name=".ui.customer.CustomerMessagesActivity" />
         <activity android:name=".ui.customer.ChatActivity"/>
-
-        <activity
-            android:name=".ui.customer.CustomerAppointmentActivity"
-            android:exported="false" />
 
         <activity
             android:name=".ui.customer.CustomerAppointmentDetailActivity"
