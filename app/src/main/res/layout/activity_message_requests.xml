@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/signaturePink"
-    tools:context=".ui.provider.MessageRequestsActivity">
+    android:background="@color/signaturePink">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarRequests"

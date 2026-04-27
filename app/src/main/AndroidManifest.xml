@@ -98,8 +98,6 @@
             android:name=".ui.provider.SPLocationPickerActivity"
             android:exported="false" />
 
-        <activity android:name=".ui.provider.MessageRequestsActivity" />
-
         <activity android:name=".ui.provider.ProviderClientsActivity" />
 
         <activity android:name=".ui.provider.SPServicesActivity" />

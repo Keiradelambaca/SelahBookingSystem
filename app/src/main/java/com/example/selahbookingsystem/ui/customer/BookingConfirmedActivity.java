@@ -16,15 +16,20 @@ import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.example.selahbookingsystem.data.dto.ConversationDto;
 import com.example.selahbookingsystem.data.dto.CreateConversationBody;
+import com.example.selahbookingsystem.data.dto.CreateMessageBody;
+import com.example.selahbookingsystem.data.dto.MessageDto;
 import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
 import com.google.gson.Gson;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -85,15 +90,14 @@ public class BookingConfirmedActivity extends AppCompatActivity {
                     Glide.with(BookingConfirmedActivity.this).load(img).into(ivLook);
                 }
 
-                tvProvider.setText(booking.provider_name);
-                tvStatus.setText(booking.status);
+                tvProvider.setText(booking.provider_name == null ? "Service provider" : booking.provider_name);
+                tvStatus.setText(booking.status == null ? "" : booking.status);
 
                 Instant s = Instant.parse(booking.start_time);
                 DateTimeFormatter fmt = DateTimeFormatter.ofPattern("EEE d MMM • HH:mm")
                         .withZone(ZoneId.systemDefault());
 
                 tvTime.setText(fmt.format(s) + " (" + booking.duration_mins + " mins)");
-
                 tvDetails.setText(new Gson().toJson(booking.details_json));
             }
 
@@ -123,17 +127,16 @@ public class BookingConfirmedActivity extends AppCompatActivity {
             return;
         }
 
-        api.findConversationByClientProviderAndBooking(
+        api.findConversationByClientAndProvider(
                 "eq." + clientId,
                 "eq." + booking.provider_id,
-                "eq." + booking.id,
                 "*",
                 1
         ).enqueue(new Callback<List<ConversationDto>>() {
             @Override
             public void onResponse(Call<List<ConversationDto>> call, Response<List<ConversationDto>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    openChat(response.body().get(0));
+                    sendFirstMessageThenOpen(response.body().get(0), clientId);
                 } else {
                     createAcceptedConversation(clientId);
                 }
@@ -159,7 +162,7 @@ public class BookingConfirmedActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<List<ConversationDto>> call, Response<List<ConversationDto>> response) {
                         if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                            openChat(response.body().get(0));
+                            sendFirstMessageThenOpen(response.body().get(0), clientId);
                         } else {
                             Toast.makeText(BookingConfirmedActivity.this, "Could not create chat", Toast.LENGTH_SHORT).show();
                         }
@@ -170,6 +173,57 @@ public class BookingConfirmedActivity extends AppCompatActivity {
                         Toast.makeText(BookingConfirmedActivity.this, "Failed to create chat", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void sendFirstMessageThenOpen(ConversationDto conversation, String clientId) {
+        String messageText = "Hi, I’ve booked an appointment and wanted to message you about it.";
+
+        CreateMessageBody body = new CreateMessageBody(
+                conversation.id,
+                clientId,
+                booking.provider_id,
+                messageText
+        );
+
+        api.createMessage("return=representation", body)
+                .enqueue(new Callback<List<MessageDto>>() {
+                    @Override
+                    public void onResponse(Call<List<MessageDto>> call, Response<List<MessageDto>> response) {
+                        if (!response.isSuccessful()) {
+                            Toast.makeText(BookingConfirmedActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        updateConversationPreviewThenOpen(conversation, messageText);
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<MessageDto>> call, Throwable t) {
+                        Toast.makeText(BookingConfirmedActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void updateConversationPreviewThenOpen(ConversationDto conversation, String messageText) {
+        Map<String, Object> updateBody = new HashMap<>();
+        updateBody.put("last_message", messageText);
+        updateBody.put("last_message_at", OffsetDateTime.now().toString());
+
+        api.updateConversationLastMessage(
+                "return=representation",
+                "eq." + conversation.id,
+                updateBody
+        ).enqueue(new Callback<List<ConversationDto>>() {
+            @Override
+            public void onResponse(Call<List<ConversationDto>> call, Response<List<ConversationDto>> response) {
+                openChat(conversation);
+            }
+
+            @Override
+            public void onFailure(Call<List<ConversationDto>> call, Throwable t) {
+                openChat(conversation);
+            }
+        });
     }
 
     private void openChat(ConversationDto conversation) {

@@ -22,9 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="Messages"
-        app:titleTextAppearance="@style/ToolbarTitleBold"
-        app:menu="@menu/menu_sp_messages"
-        app:itemIconTint="@android:color/black" />
+        app:titleTextAppearance="@style/ToolbarTitleBold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChats"
