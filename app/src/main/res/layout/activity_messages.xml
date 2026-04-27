@@ -8,8 +8,6 @@
     android:background="@color/signaturePink"
     tools:context=".ui.customer.CustomerMessagesActivity">
 
-    <!-- TOP TOOLBAR (replaces Messages title TextView) -->
-
     <!-- Chats list -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarMessages"

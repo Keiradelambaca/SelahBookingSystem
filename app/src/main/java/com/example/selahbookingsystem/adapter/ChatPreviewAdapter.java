@@ -41,10 +41,6 @@ public class ChatPreviewAdapter extends RecyclerView.Adapter<ChatPreviewAdapter.
 
         h.tvName.setText(chat.otherUserName);
         h.tvLastMessage.setText(chat.lastMessage == null ? "" : chat.lastMessage);
-
-        // If you use Glide/Picasso later, load chat.otherUserPhotoUrl into h.ivProfile
-        // For now keep placeholder.
-
         h.itemView.setOnClickListener(v -> listener.onChatClick(chat));
     }
 

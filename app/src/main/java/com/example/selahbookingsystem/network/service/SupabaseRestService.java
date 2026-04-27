@@ -581,4 +581,10 @@ public interface SupabaseRestService {
                 @Body ReadAtUpdateBody body
         );
 
+    @PATCH("rest/v1/conversations")
+    Call<List<ConversationDto>> updateConversationLastMessage(
+            @Header("Prefer") String prefer,
+            @Query("id") String conversationId,
+            @Body Map<String, Object> body
+    );
 }
