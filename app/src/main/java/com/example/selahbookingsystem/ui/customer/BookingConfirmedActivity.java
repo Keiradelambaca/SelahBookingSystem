@@ -1,7 +1,6 @@
 package com.example.selahbookingsystem.ui.customer;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
@@ -15,18 +14,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.dto.ConversationDto;
+import com.example.selahbookingsystem.data.dto.CreateConversationBody;
+import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
 import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,6 +33,9 @@ import retrofit2.Response;
 public class BookingConfirmedActivity extends AppCompatActivity {
 
     public static final String EXTRA_BOOKING_ID = "extra_booking_id";
+
+    private SupabaseRestService api;
+    private BookingDto booking;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +47,8 @@ public class BookingConfirmedActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        api = ApiClient.supabase();
 
         ImageView ivLook = findViewById(R.id.ivBookedLook);
         TextView tvProvider = findViewById(R.id.tvConfirmedProvider);
@@ -62,7 +65,8 @@ public class BookingConfirmedActivity extends AppCompatActivity {
             startActivity(i);
         });
 
-        SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
+        btnMessage.setOnClickListener(v -> openChatWithProvider());
+
         api.getBookingById("*", "eq." + bookingId).enqueue(new Callback<List<BookingDto>>() {
             @Override
             public void onResponse(Call<List<BookingDto>> call, Response<List<BookingDto>> response) {
@@ -71,24 +75,26 @@ public class BookingConfirmedActivity extends AppCompatActivity {
                     return;
                 }
 
-                BookingDto b = response.body().get(0);
+                booking = response.body().get(0);
 
-                String img = !isBlank(b.inspo_photo_url) ? b.inspo_photo_url : b.current_photo_url;
-                if (!isBlank(img)) {
+                String img = booking.inspo_photo_url != null
+                        ? booking.inspo_photo_url
+                        : booking.current_photo_url;
+
+                if (img != null) {
                     Glide.with(BookingConfirmedActivity.this).load(img).into(ivLook);
                 }
 
-                tvProvider.setText(!isBlank(b.provider_name) ? b.provider_name : "Provider");
-                tvStatus.setText(!isBlank(b.status) ? b.status : "Confirmed");
-                tvTime.setText(formatBookingTime(b.start_time, b.duration_mins));
-                tvDetails.setText(buildBookingDetailsText(b));
+                tvProvider.setText(booking.provider_name);
+                tvStatus.setText(booking.status);
 
-                btnMessage.setOnClickListener(v -> {
-                    Intent i = new Intent(BookingConfirmedActivity.this, CustomerMessagesActivity.class);
-                    i.putExtra("extra_provider_id", b.provider_id);
-                    i.putExtra("extra_provider_name", b.provider_name);
-                    startActivity(i);
-                });
+                Instant s = Instant.parse(booking.start_time);
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("EEE d MMM • HH:mm")
+                        .withZone(ZoneId.systemDefault());
+
+                tvTime.setText(fmt.format(s) + " (" + booking.duration_mins + " mins)");
+
+                tvDetails.setText(new Gson().toJson(booking.details_json));
             }
 
             @Override
@@ -99,258 +105,78 @@ public class BookingConfirmedActivity extends AppCompatActivity {
         });
     }
 
-    private String formatBookingTime(String startTime, int durationMins) {
-        if (isBlank(startTime)) {
-            return durationMins > 0 ? durationMins + " mins" : "";
+    private void openChatWithProvider() {
+        if (booking == null) {
+            Toast.makeText(this, "Booking is still loading", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Instant s = Instant.parse(startTime);
-                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("EEE d MMM • HH:mm", Locale.getDefault())
-                        .withZone(ZoneId.systemDefault());
+        String clientId = TokenStore.getUserId(this);
 
-                if (durationMins > 0) {
-                    return fmt.format(s) + " (" + durationMins + " mins)";
+        if (TextUtils.isEmpty(clientId)) {
+            Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (TextUtils.isEmpty(booking.provider_id)) {
+            Toast.makeText(this, "Provider missing", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        api.findConversationByClientProviderAndBooking(
+                "eq." + clientId,
+                "eq." + booking.provider_id,
+                "eq." + booking.id,
+                "*",
+                1
+        ).enqueue(new Callback<List<ConversationDto>>() {
+            @Override
+            public void onResponse(Call<List<ConversationDto>> call, Response<List<ConversationDto>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    openChat(response.body().get(0));
+                } else {
+                    createAcceptedConversation(clientId);
                 }
-                return fmt.format(s);
             }
-        } catch (Exception ignored) {
-        }
 
-        return startTime + (durationMins > 0 ? " (" + durationMins + " mins)" : "");
-    }
-
-    private String buildBookingDetailsText(BookingDto b) {
-        List<String> lines = new ArrayList<>();
-
-        Map<String, Object> details = asMap(b.details_json);
-        if (details == null || details.isEmpty()) {
-            return "No additional booking details.";
-        }
-
-        String serviceName = firstNonBlank(
-                getString(details, "service_name"),
-                getString(details, "service"),
-                getString(details, "service_code")
-        );
-
-        String shape = firstNonBlank(
-                getString(details, "shape"),
-                getString(details, "selected_shape")
-        );
-
-        String length = firstNonBlank(
-                getString(details, "length"),
-                getString(details, "selected_length")
-        );
-
-        String designLevel = firstNonBlank(
-                getString(details, "design_level"),
-                getString(details, "design"),
-                getString(details, "design_style")
-        );
-
-        String addonCodes = getCommaJoined(details, "addon_codes");
-
-        Boolean handDrawn = getBoolean(details, "hand_drawn");
-        String handDrawnText = null;
-        if (handDrawn != null) {
-            handDrawnText = handDrawn ? "Yes" : "No";
-        }
-
-        Double totalPrice = firstNonNullDouble(
-                getDouble(details, "total_price"),
-                getDouble(details, "price"),
-                getNestedDouble(details, "pricing_snapshot", "total_price")
-        );
-
-        if (!isBlank(serviceName)) {
-            lines.add("Service: " + prettifyCode(serviceName));
-        }
-
-        if (!isBlank(shape)) {
-            lines.add("Shape: " + prettifyCode(shape));
-        }
-
-        if (!isBlank(length)) {
-            lines.add("Length: " + prettifyCode(length));
-        }
-
-        if (!isBlank(designLevel)) {
-            lines.add("Design: " + prettifyCode(designLevel));
-        }
-
-        if (!isBlank(handDrawnText)) {
-            lines.add("Hand-drawn art: " + handDrawnText);
-        }
-
-        if (!isBlank(addonCodes)) {
-            lines.add("Add-ons: " + prettifyCsvCodes(addonCodes));
-        }
-
-        if (totalPrice != null && totalPrice > 0) {
-            lines.add(String.format(Locale.getDefault(), "Estimated total: €%.2f", totalPrice));
-        }
-
-        if (lines.isEmpty()) {
-            return "No additional booking details.";
-        }
-
-        return TextUtils.join("\n", lines);
-    }
-
-    @Nullable
-    private Map<String, Object> asMap(Object obj) {
-        if (obj == null) return null;
-
-        if (obj instanceof Map) {
-            try {
-                //noinspection unchecked
-                return (Map<String, Object>) obj;
-            } catch (Exception ignored) {
+            @Override
+            public void onFailure(Call<List<ConversationDto>> call, Throwable t) {
+                Toast.makeText(BookingConfirmedActivity.this, "Failed to open chat", Toast.LENGTH_SHORT).show();
             }
-        }
-
-        try {
-            String json = new Gson().toJson(obj);
-            return new Gson().fromJson(json, LinkedTreeMap.class);
-        } catch (Exception e) {
-            return null;
-        }
+        });
     }
 
-    @Nullable
-    private String getString(Map<String, Object> map, String key) {
-        if (map == null || key == null || !map.containsKey(key)) return null;
-        Object value = map.get(key);
-        if (value == null) return null;
-        String s = String.valueOf(value).trim();
-        return s.isEmpty() || "null".equalsIgnoreCase(s) ? null : s;
-    }
+    private void createAcceptedConversation(String clientId) {
+        CreateConversationBody body = new CreateConversationBody(
+                clientId,
+                booking.provider_id,
+                booking.id,
+                "accepted"
+        );
 
-    @Nullable
-    private Boolean getBoolean(Map<String, Object> map, String key) {
-        if (map == null || key == null || !map.containsKey(key)) return null;
-        Object value = map.get(key);
-        if (value instanceof Boolean) return (Boolean) value;
-        if (value instanceof String) {
-            String s = ((String) value).trim();
-            if ("true".equalsIgnoreCase(s)) return true;
-            if ("false".equalsIgnoreCase(s)) return false;
-        }
-        return null;
-    }
-
-    @Nullable
-    private Double getDouble(Map<String, Object> map, String key) {
-        if (map == null || key == null || !map.containsKey(key)) return null;
-        Object value = map.get(key);
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            try {
-                return Double.parseDouble(((String) value).trim());
-            } catch (Exception ignored) {
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    private Double getNestedDouble(Map<String, Object> map, String parentKey, String childKey) {
-        if (map == null || !map.containsKey(parentKey)) return null;
-
-        Object parent = map.get(parentKey);
-        if (!(parent instanceof Map)) return null;
-
-        try {
-            //noinspection unchecked
-            Map<String, Object> nested = (Map<String, Object>) parent;
-            return getDouble(nested, childKey);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String getCommaJoined(Map<String, Object> map, String key) {
-        if (map == null || key == null || !map.containsKey(key)) return null;
-
-        Object value = map.get(key);
-        if (value == null) return null;
-
-        if (value instanceof List) {
-            List<?> list = (List<?>) value;
-            List<String> parts = new ArrayList<>();
-            for (Object o : list) {
-                if (o != null) {
-                    String s = String.valueOf(o).trim();
-                    if (!s.isEmpty() && !"null".equalsIgnoreCase(s)) {
-                        parts.add(s);
+        api.createConversation("return=representation", body)
+                .enqueue(new Callback<List<ConversationDto>>() {
+                    @Override
+                    public void onResponse(Call<List<ConversationDto>> call, Response<List<ConversationDto>> response) {
+                        if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                            openChat(response.body().get(0));
+                        } else {
+                            Toast.makeText(BookingConfirmedActivity.this, "Could not create chat", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-            }
-            return parts.isEmpty() ? null : TextUtils.join(", ", parts);
-        }
 
-        String s = String.valueOf(value).trim();
-        return s.isEmpty() || "null".equalsIgnoreCase(s) ? null : s;
+                    @Override
+                    public void onFailure(Call<List<ConversationDto>> call, Throwable t) {
+                        Toast.makeText(BookingConfirmedActivity.this, "Failed to create chat", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
-    @Nullable
-    private String firstNonBlank(String... values) {
-        if (values == null) return null;
-        for (String v : values) {
-            if (!isBlank(v)) return v;
-        }
-        return null;
-    }
-
-    @Nullable
-    private Double firstNonNullDouble(Double... values) {
-        if (values == null) return null;
-        for (Double v : values) {
-            if (v != null) return v;
-        }
-        return null;
-    }
-
-    private String prettifyCode(String raw) {
-        if (isBlank(raw)) return "";
-        String s = raw.replace("_", " ").replace("-", " ").trim();
-
-        String[] words = s.split("\\s+");
-        StringBuilder out = new StringBuilder();
-
-        for (String word : words) {
-            if (word.isEmpty()) continue;
-            if (out.length() > 0) out.append(" ");
-            out.append(Character.toUpperCase(word.charAt(0)));
-            if (word.length() > 1) {
-                out.append(word.substring(1).toLowerCase(Locale.getDefault()));
-            }
-        }
-        return out.toString();
-    }
-
-    private String prettifyCsvCodes(String csv) {
-        if (isBlank(csv)) return "";
-        String[] parts = csv.split(",");
-        List<String> pretty = new ArrayList<>();
-        for (String p : parts) {
-            String cleaned = prettifyCode(p.trim());
-            if (!cleaned.isEmpty()) {
-                pretty.add(cleaned);
-            }
-        }
-        return TextUtils.join(", ", pretty);
-    }
-
-    private boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
+    private void openChat(ConversationDto conversation) {
+        Intent i = new Intent(this, ChatActivity.class);
+        i.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversation.id);
+        i.putExtra(ChatActivity.EXTRA_OTHER_USER_ID, booking.provider_id);
+        i.putExtra(ChatActivity.EXTRA_OTHER_USER_NAME, booking.provider_name);
+        startActivity(i);
     }
 }
