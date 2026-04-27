@@ -45,7 +45,7 @@ public class SPHomeActivity extends SPBaseActivity {
 
     @Override
     protected int getSelectedNavItemId() {
-        return R.id.nav_home;
+        return R.id.nav_sp_home;
     }
 
     @Override

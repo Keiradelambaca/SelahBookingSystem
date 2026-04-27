@@ -1,9 +1,7 @@
 package com.example.selahbookingsystem.ui.provider;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,6 +31,10 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import android.location.Address;
+import android.location.Geocoder;
+import java.io.IOException;
 
 public class SPProfileActivity extends SPBaseActivity {
 
@@ -282,7 +284,7 @@ public class SPProfileActivity extends SPBaseActivity {
         if (currentUserId == null) return;
 
         String idFilter = "eq." + currentUserId;
-        String select = "id,full_name,email,phone,dob,role,created_at,eircode,address,banner_url";
+        String select = "id,full_name,email,phone,dob,role,created_at,eircode,address,banner_url,lat,lng";
 
         api.getProfile(idFilter, select).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
             @Override
@@ -369,11 +371,45 @@ public class SPProfileActivity extends SPBaseActivity {
     private void updateLocation(String eircode) {
         if (currentUserId == null) return;
 
+        String cleanEircode = eircode.trim();
+
+        if (pickedLat == null || pickedLng == null) {
+            try {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> results = geocoder.getFromLocationName(cleanEircode + ", Ireland", 1);
+
+                if (results != null && !results.isEmpty()) {
+                    Address result = results.get(0);
+
+                    pickedLat = result.getLatitude();
+                    pickedLng = result.getLongitude();
+
+                    if (pickedAddress == null || pickedAddress.isEmpty()) {
+                        pickedAddress = result.getAddressLine(0);
+                    }
+
+                    updateMapPreview(pickedLat, pickedLng);
+                    locationPreviewText.setText("Current: " + pickedAddress);
+                } else {
+                    Toast.makeText(this, "Could not find that Eircode. Try Pick on Map.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+            } catch (IOException e) {
+                Toast.makeText(this, "Could not look up location. Try Pick on Map.", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
         String idFilter = "eq." + currentUserId;
 
-        // Save eircode + address
         SupabaseRestService.ProviderLocationUpdateBody body =
-                new SupabaseRestService.ProviderLocationUpdateBody(eircode, pickedAddress, pickedLat, pickedLng);
+                new SupabaseRestService.ProviderLocationUpdateBody(
+                        cleanEircode,
+                        pickedAddress,
+                        pickedLat,
+                        pickedLng
+                );
 
         api.updateProviderLocation(idFilter, body).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
             @Override
@@ -383,6 +419,7 @@ public class SPProfileActivity extends SPBaseActivity {
                     Toast.makeText(SPProfileActivity.this, "Failed to save location", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 Toast.makeText(SPProfileActivity.this, "Location saved", Toast.LENGTH_SHORT).show();
                 loadProviderProfile();
             }
