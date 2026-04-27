@@ -3,13 +3,20 @@ package com.example.selahbookingsystem.network.service;
 import com.example.selahbookingsystem.data.dto.AiBookingAssessmentResponse;
 import com.example.selahbookingsystem.data.dto.AppServiceDto;
 import com.example.selahbookingsystem.data.dto.BookingDto;
+import com.example.selahbookingsystem.data.dto.ConversationDto;
+import com.example.selahbookingsystem.data.dto.ConversationPreviewDto;
+import com.example.selahbookingsystem.data.dto.CreateMessageBody;
+import com.example.selahbookingsystem.data.dto.MessageDto;
 import com.example.selahbookingsystem.data.dto.ProfileRoleDto;
 import com.example.selahbookingsystem.data.dto.ProviderServicePricingDto;
+import com.example.selahbookingsystem.data.dto.ReadAtUpdateBody;
 import com.example.selahbookingsystem.data.dto.ServiceDto;
 import com.example.selahbookingsystem.data.dto.ServiceModifierDto;
 import com.example.selahbookingsystem.data.dto.EmailTemplateDto;
 import com.example.selahbookingsystem.data.dto.ProviderSettingsDto;
+import com.example.selahbookingsystem.data.dto.UpdateConversationStatusBody;
 import com.example.selahbookingsystem.data.model.AiBookingAssessmentRequest;
+import com.example.selahbookingsystem.data.dto.CreateConversationBody;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +25,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -503,5 +511,74 @@ public interface SupabaseRestService {
             @Body List<Map<String, Object>> body
     );
 
+    // =========================
+    // MESSAGING
+    // =========================
+
+        @GET("rest/v1/conversation_previews")
+        Call<List<ConversationPreviewDto>> listCustomerConversationPreviews(
+                @Query("client_id") String clientId,
+                @Query("select") String select,
+                @Query("order") String order
+        );
+
+        @GET("rest/v1/conversation_previews")
+        Call<List<ConversationPreviewDto>> listProviderConversationPreviews(
+                @Query("provider_id") String providerId,
+                @Query("select") String select,
+                @Query("order") String order
+        );
+
+        @GET("rest/v1/conversations")
+        Call<List<ConversationDto>> findConversationByClientAndProvider(
+                @Query("client_id") String clientId,
+                @Query("provider_id") String providerId,
+                @Query("select") String select,
+                @Query("limit") int limit
+        );
+
+        @GET("rest/v1/conversations")
+        Call<List<ConversationDto>> findConversationByClientProviderAndBooking(
+                @Query("client_id") String clientId,
+                @Query("provider_id") String providerId,
+                @Query("booking_id") String bookingId,
+                @Query("select") String select,
+                @Query("limit") int limit
+        );
+
+        @POST("rest/v1/conversations")
+        Call<List<ConversationDto>> createConversation(
+                @Header("Prefer") String prefer,
+                @Body CreateConversationBody body
+        );
+
+        @PATCH("rest/v1/conversations")
+        Call<List<ConversationDto>> updateConversationStatus(
+                @Header("Prefer") String prefer,
+                @Query("id") String conversationId,
+                @Body UpdateConversationStatusBody body
+        );
+
+        @GET("rest/v1/messages")
+        Call<List<MessageDto>> listMessages(
+                @Query("conversation_id") String conversationId,
+                @Query("select") String select,
+                @Query("order") String order
+        );
+
+        @POST("rest/v1/messages")
+        Call<List<MessageDto>> createMessage(
+                @Header("Prefer") String prefer,
+                @Body CreateMessageBody body
+        );
+
+        @PATCH("rest/v1/messages")
+        Call<List<MessageDto>> markMessagesRead(
+                @Header("Prefer") String prefer,
+                @Query("conversation_id") String conversationId,
+                @Query("receiver_id") String receiverId,
+                @Query("read_at") String readAtFilter,
+                @Body ReadAtUpdateBody body
+        );
 
 }
