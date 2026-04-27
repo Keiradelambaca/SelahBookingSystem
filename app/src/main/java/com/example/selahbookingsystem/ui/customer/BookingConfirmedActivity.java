@@ -174,9 +174,9 @@ public class BookingConfirmedActivity extends AppCompatActivity {
 
     private void openChat(ConversationDto conversation) {
         Intent i = new Intent(this, ChatActivity.class);
-        i.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversation.id);
-        i.putExtra(ChatActivity.EXTRA_OTHER_USER_ID, booking.provider_id);
-        i.putExtra(ChatActivity.EXTRA_OTHER_USER_NAME, booking.provider_name);
+        i.putExtra("chatId", conversation.id);
+        i.putExtra("otherUserId", booking.provider_id);
+        i.putExtra("name", booking.provider_name);
         startActivity(i);
     }
 }
