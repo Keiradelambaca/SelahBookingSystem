@@ -164,7 +164,7 @@ public interface SupabaseRestService {
     }
 
 
-    class BookingUpdateBody {
+    public static class BookingUpdateBody {
         public String status;
         public String start_time;
         public String end_time;
@@ -587,4 +587,7 @@ public interface SupabaseRestService {
             @Query("id") String conversationId,
             @Body Map<String, Object> body
     );
+
+    @POST("functions/v1/create-balance-checkout")
+    Call<Map<String, Object>> fnCreateBalanceCheckout(@Body Map<String, Object> body);
 }

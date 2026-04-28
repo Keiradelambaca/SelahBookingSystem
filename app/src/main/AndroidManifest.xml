@@ -112,6 +112,8 @@
 
         <activity android:name=".ui.provider.SPAppointmentDetailsActivity" />
 
+        <activity android:name=".ui.customer.BalancePaymentActivity" />
+
         <!-- Preloaded fonts -->
         <meta-data
             android:name="preloaded_fonts"
