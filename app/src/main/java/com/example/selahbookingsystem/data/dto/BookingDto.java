@@ -28,5 +28,16 @@ public class BookingDto {
     @Nullable public String client_name;
     @Nullable public String service_name;
 
+    @Nullable public ProviderProfileDto provider;
+
+    public static class ProviderProfileDto {
+        @Nullable public String business_name;
+        @Nullable public String full_name;
+        @Nullable public String eircode;
+        @Nullable public String address;
+        @Nullable public Double lat;
+        @Nullable public Double lng;
+    }
+
 }
 
