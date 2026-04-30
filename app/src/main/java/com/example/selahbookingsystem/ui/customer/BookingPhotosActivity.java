@@ -11,12 +11,13 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.selahbookingsystem.R;
 import com.example.selahbookingsystem.network.storage.SupabaseStorageUploader;
 import com.example.selahbookingsystem.ui.base.BaseActivity;
 
-public class BookingPhotosActivity extends BaseActivity {
+public class BookingPhotosActivity extends AppCompatActivity {
 
     public static final String EXTRA_PROVIDER_ID = "extra_provider_id";
     public static final String EXTRA_PROVIDER_NAME = "extra_provider_name";
@@ -29,11 +30,6 @@ public class BookingPhotosActivity extends BaseActivity {
 
     private ImageView imgCurrent, imgInspo;
     private Button btnContinue;
-
-    @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_home;
-    }
 
     private final ActivityResultLauncher<String> pickCurrentLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -67,15 +63,10 @@ public class BookingPhotosActivity extends BaseActivity {
 
         Button btnPickCurrent = findViewById(R.id.btnPickCurrent);
         Button btnPickInspo = findViewById(R.id.btnPickInspo);
-        TextView btnNoInspo = findViewById(R.id.btnNoInspo);
         btnContinue = findViewById(R.id.btnContinue);
 
         btnPickCurrent.setOnClickListener(v -> pickCurrentLauncher.launch("image/*"));
         btnPickInspo.setOnClickListener(v -> pickInspoLauncher.launch("image/*"));
-
-        btnNoInspo.setOnClickListener(v ->
-                Toast.makeText(this, "Explore flow next (Phase 1.5)", Toast.LENGTH_SHORT).show()
-        );
 
         btnContinue.setOnClickListener(v -> {
             if (providerId == null || providerId.trim().isEmpty()) {
@@ -169,7 +160,6 @@ public class BookingPhotosActivity extends BaseActivity {
         next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_ID, providerId);
         next.putExtra(BookingBubblesActivity.EXTRA_PROVIDER_NAME, providerName);
 
-        // These are now Supabase Storage URLs
         next.putExtra(BookingBubblesActivity.EXTRA_CURRENT_URI, currentUrl);
 
         if (inspoUrl != null) {

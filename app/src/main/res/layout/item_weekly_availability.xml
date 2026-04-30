@@ -4,74 +4,96 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    app:cardCornerRadius="16dp"
-    app:cardUseCompatPadding="true">
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/softWhite"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:orientation="vertical">
+        android:minHeight="130dp"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvDay"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:minHeight="34dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/poppins"
                 android:text="Monday"
-                android:textStyle="bold"
-                android:textSize="15sp"/>
+                android:textColor="@color/black"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchEnabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="On"/>
+                android:text="On"
+                android:textColor="@color/textGrey"
+                android:fontFamily="@font/poppins" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnStart"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
                 android:layout_weight="1"
-                android:text="Start"
-                app:cornerRadius="12dp"
-                style="?attr/materialButtonOutlinedStyle"/>
+                android:fontFamily="@font/poppins"
+                android:text="09:00"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                app:backgroundTint="@android:color/white"
+                app:cornerRadius="27dp"
+                app:strokeColor="#DDDDDD"
+                app:strokeWidth="1dp" />
 
             <Space
                 android:layout_width="10dp"
-                android:layout_height="1dp"/>
+                android:layout_height="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEnd"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="54dp"
                 android:layout_weight="1"
-                android:text="End"
-                app:cornerRadius="12dp"
-                style="?attr/materialButtonOutlinedStyle"/>
+                android:fontFamily="@font/poppins"
+                android:text="17:00"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                app:backgroundTint="@android:color/white"
+                app:cornerRadius="27dp"
+                app:strokeColor="#DDDDDD"
+                app:strokeWidth="1dp" />
+
         </LinearLayout>
 
         <TextView
             android:id="@+id/tvHint"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="28dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/poppins"
             android:text="Tip: keep 30-min gaps for realistic scheduling."
-            android:alpha="0.6"
-            android:paddingTop="8dp"/>
+            android:textColor="@color/textGrey"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
