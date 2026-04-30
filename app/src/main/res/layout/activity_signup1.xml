@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/signaturePink">
+
+    <ImageView
+        android:id="@+id/Logo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:contentDescription="Selah logo"
+        android:src="@drawable/selah_logo"
+        app:layout_constraintBottom_toTopOf="@id/loginCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/loginCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        app:cardBackgroundColor="@color/softWhite"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="56dp"
+                android:fontFamily="@font/poppins"
+                android:gravity="center"
+                android:text="@string/are_you_signing_up_as_a"
+                android:textColor="@color/black"
+                android:textSize="21sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/customerButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="22dp"
+                android:fontFamily="@font/poppins"
+                android:text="@string/customer"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                app:backgroundTint="@color/buttonPurple"
+                app:cornerRadius="28dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/providerButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/poppins"
+                android:text="@string/service_provider"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                app:backgroundTint="@color/buttonPurple"
+                app:cornerRadius="28dp" />
+
+            <TextView
+                android:id="@+id/backToLoginText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="38dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/poppins"
+                android:gravity="center"
+                android:text="@string/back_to_login"
+                android:textColor="@color/textGrey"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

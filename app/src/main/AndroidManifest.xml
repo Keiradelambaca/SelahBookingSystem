@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Internet permission required for Supabase API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.Selah"
+        android:name=".SelahApp">
+
+        <!-- Launcher / Login -->
+        <activity
+            android:name=".ui.auth.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Home (post-login) -->
+        <activity
+            android:name=".ui.auth.HomeActivity"
+            android:exported="false" />
+
+        <!-- Signup flow: screen 1 (chooser?) -->
+        <activity
+            android:name=".ui.auth.SignupActivity1"
+            android:exported="false" />
+
+        <!-- Signup: Customer -->
+        <activity
+            android:name=".ui.auth.SignupActivityCustomer"
+            android:exported="false" />
+
+        <!-- Signup: Service Provider (uses activity_signup_sp1.xml) -->
+        <activity
+            android:name=".ui.auth.SignupActivityServiceProvider1"
+            android:exported="false" />
+
+        <!-- Welcome opening page: Customer (uses activity_welcome_customer.xml) -->
+        <activity
+            android:name=".ui.customer.CustomerHomeActivity"
+            android:exported="false"/>
+
+        <!-- Welcome opening page: Provider (uses activity_welcome_provider.xml) -->
+        <activity
+            android:name=".ui.provider.SPHomeActivity"
+            android:exported="false"/>
+
+        <!-- User book appointment/choose a SP -->
+        <activity android:name=".ui.customer.SelectProviderActivity" />
+
+        <activity android:name=".ui.customer.CustomerProfileActivity" />
+
+        <activity android:name=".ui.customer.CustomerMessagesActivity" />
+        <activity android:name=".ui.customer.ChatActivity"/>
+
+        <activity
+            android:name=".ui.customer.CustomerAppointmentDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.customer.CustomerAppointmentMapActivity"
+            android:exported="false" />
+
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity android:name=".ui.customer.BookingPhotosActivity" />
+        <activity android:name=".ui.customer.BookingBubblesActivity" />
+        <activity android:name=".ui.customer.PickTimeslotActivity" />
+        <activity android:name=".ui.customer.ConfirmBookingActivity" />
+        <activity android:name=".ui.customer.BookingConfirmedActivity" />
+
+        <activity android:name=".ui.provider.SPProfileActivity" />
+
+        <activity android:name=".ui.provider.SPSchedulingActivity" />
+        <activity android:name=".ui.provider.SPAvailabilityActivity" />
+
+        <activity android:name=".ui.provider.SPClientsActivity" />
+        <activity android:name=".ui.provider.SPMessagesActivity" />
+
+        <activity
+            android:name=".ui.provider.SPLocationPickerActivity"
+            android:exported="false" />
+
+        <activity android:name=".ui.provider.ProviderClientsActivity" />
+
+        <activity android:name=".ui.provider.SPServicesActivity" />
+
+        <activity android:name=".ui.customer.CustomerRescheduleActivity" />
+
+        <activity android:name=".ui.provider.SPAutoEmailsActivity" />
+
+        <activity android:name=".ui.provider.SPDepositsPaymentsActivity" />
+
+        <activity android:name=".ui.customer.DepositPaymentActivity" />
+
+        <activity android:name=".ui.provider.SPAppointmentDetailsActivity" />
+
+        <activity android:name=".ui.customer.BalancePaymentActivity" />
+
+        <!-- Preloaded fonts -->
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+    </application>
+
+</manifest>
+

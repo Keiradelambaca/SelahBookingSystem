@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardClient"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="@color/softWhite"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="30dp"
+            android:fontFamily="@font/poppins"
+            android:text="Client Name"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="26dp"
+            android:fontFamily="@font/poppins"
+            android:text="email@email.com"
+            android:textColor="@color/textGrey"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="26dp"
+            android:fontFamily="@font/poppins"
+            android:text="+353..."
+            android:textColor="@color/textGrey"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/expandedSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="14dp"
+            android:visibility="gone">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#16000000" />
+
+            <TextView
+                android:id="@+id/tvTimesBooked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="34dp"
+                android:fontFamily="@font/poppins"
+                android:paddingTop="12dp"
+                android:text="Times booked: 0"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvLastAppointment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="28dp"
+                android:fontFamily="@font/poppins"
+                android:text="Last appointment: —"
+                android:textColor="@color/textGrey"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvPayment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="28dp"
+                android:fontFamily="@font/poppins"
+                android:text="Saved card: —"
+                android:textColor="@color/textGrey"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChargeRemainder"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/poppins"
+                android:text="Charge remainder"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                app:backgroundTint="@android:color/white"
+                app:cornerRadius="26dp"
+                app:strokeColor="#DDDDDD"
+                app:strokeWidth="1dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

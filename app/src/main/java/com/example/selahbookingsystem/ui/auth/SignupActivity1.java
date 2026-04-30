@@ -1,0 +1,57 @@
+package com.example.selahbookingsystem.ui.auth;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.selahbookingsystem.R;
+
+public class SignupActivity1 extends AppCompatActivity {
+
+    public static final String EXTRA_ROLE = "EXTRA_ROLE";
+    TextView backToLoginText;
+    Button customerButton, serviceProviderButton;
+
+    @SuppressLint("MissingInflatedId")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_signup1);
+
+        backToLoginText = findViewById(R.id.backToLoginText);
+        customerButton = findViewById(R.id.customerButton);
+        serviceProviderButton = findViewById(R.id.providerButton);
+
+        customerButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SignupActivityCustomer.class);
+            intent.putExtra(EXTRA_ROLE, "client");
+            startActivity(intent);
+        });
+
+        serviceProviderButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SignupActivityServiceProvider1.class);
+            intent.putExtra(EXTRA_ROLE, "provider");
+            startActivity(intent);
+        });
+
+        backToLoginText.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+}

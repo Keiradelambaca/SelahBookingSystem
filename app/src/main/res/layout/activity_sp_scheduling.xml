@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/signaturePink">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="Scheduling"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+
+        <TextView
+            android:text="Manage your setup"
+            android:textColor="@color/textGrey"
+            android:layout_marginBottom="16dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
+
+        <!-- GRID FEEL -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAvailability"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="28dp"
+            app:cardBackgroundColor="@color/softWhite"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:text="Availability"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardServices"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="28dp"
+            app:cardBackgroundColor="@color/softWhite"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:text="Services"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardEmails"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="28dp"
+            app:cardBackgroundColor="@color/softWhite"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:text="Auto Emails"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPayments"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="28dp"
+            app:cardBackgroundColor="@color/softWhite"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:text="Payments"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

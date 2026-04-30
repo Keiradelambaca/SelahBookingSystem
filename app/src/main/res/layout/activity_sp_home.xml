@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/signaturePink">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="18dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tvGreeting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:text="Hello,"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins"
+            android:textColor="#FF000000"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This week's appointments"
+            android:textSize="16sp"
+            android:textColor="@color/textGrey"
+            android:layout_marginTop="6dp"/>
+
+        <TextView
+            android:id="@+id/tvEmptyState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No upcoming appointments this week"
+            android:textSize="15sp"
+            android:textColor="@color/textGrey"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvAppointments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
+            android:clipToPadding="false"
+            android:paddingBottom="20dp"/>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
