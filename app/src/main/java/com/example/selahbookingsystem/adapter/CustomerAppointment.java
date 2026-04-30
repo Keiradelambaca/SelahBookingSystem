@@ -17,15 +17,13 @@ public class CustomerAppointment {
     private String locationArea;
     private double price;
     private PaymentStatus paymentStatus = PaymentStatus.DEPOSIT_NOT_PAID;
-    private String bannerUrl;            // nullable
-    private Instant appointmentStart;   // UTC Instant
-    private int durationMins = 60;       // default
+    private String bannerUrl;         
+    private Instant appointmentStart;  
+    private int durationMins = 60;    
 
-    // ✅ REQUIRED empty constructor (for backend mapping)
     public CustomerAppointment() {
     }
 
-    // ✅ Keep your original constructor for convenience if you still want it
     public CustomerAppointment(
             String id,
             String serviceTitle,
@@ -46,9 +44,7 @@ public class CustomerAppointment {
         this.appointmentStart = appointmentStart;
     }
 
-    // =====================
     // GETTERS
-    // =====================
 
     public String getId() { return id; }
     public String getServiceTitle() { return serviceTitle; }
@@ -99,9 +95,7 @@ public class CustomerAppointment {
         this.durationMins = durationMins;
     }
 
-    // =====================
     // OPTIONAL HELPERS
-    // =====================
 
     public Instant getAppointmentEnd() {
         if (appointmentStart == null) return null;
