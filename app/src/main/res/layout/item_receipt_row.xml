@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:minHeight="36dp"
     android:gravity="center_vertical"
+    android:orientation="horizontal"
     android:paddingTop="7dp"
     android:paddingBottom="7dp">
 
@@ -12,16 +14,18 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:fontFamily="@font/poppins"
         android:text="Appointment total"
-        android:textColor="#5F5F5F"
+        android:textColor="@color/textGrey"
         android:textSize="15sp" />
 
     <TextView
         android:id="@+id/tvReceiptAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins"
         android:text="€0.00"
-        android:textColor="@android:color/black"
+        android:textColor="@color/black"
         android:textSize="15sp"
         android:textStyle="bold" />
 

@@ -21,7 +21,6 @@ public class SPSchedulingActivity extends SPBaseActivity {
         MaterialCardView cardServices = findViewById(R.id.cardServices);
         MaterialCardView cardEmails = findViewById(R.id.cardEmails);
         MaterialCardView cardPayments = findViewById(R.id.cardPayments);
-        MaterialCardView cardManualBooking = findViewById(R.id.cardManualBooking);
 
         cardAvailability.setOnClickListener(v ->
                 startActivity(new Intent(this, SPAvailabilityActivity.class)));
@@ -34,8 +33,5 @@ public class SPSchedulingActivity extends SPBaseActivity {
 
         cardPayments.setOnClickListener(v ->
                 startActivity(new Intent(this, SPDepositsPaymentsActivity.class)));
-
-        // TODO: wire these later
-        cardManualBooking.setOnClickListener(v -> { });
     }
 }

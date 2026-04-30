@@ -23,7 +23,6 @@
             android:orientation="vertical"
             android:paddingBottom="96dp">
 
-            <!-- PROFILE CARD (same as customer) -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/profileCard"
                 android:layout_width="match_parent"
@@ -92,11 +91,15 @@
                         <Button
                             android:id="@+id/changeButton"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="48dp"
                             android:backgroundTint="@color/buttonGreen"
-                            android:fontFamily="@font/poppins"
                             android:text="Change"
-                            android:textColor="#FFFFFF"/>
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="false"
+                            android:fontFamily="@font/poppins"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="20dp"
+                            app:cornerRadius="24dp"/>
                     </LinearLayout>
 
                     <TextView
@@ -152,7 +155,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- PROVIDER BANNER CARD -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/bannerCard"
                 android:layout_width="match_parent"
@@ -191,16 +193,19 @@
                     <Button
                         android:id="@+id/changeBannerButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="50dp"
                         android:layout_marginTop="12dp"
                         android:backgroundTint="@color/buttonPurple"
                         android:text="Upload Banner"
                         android:textColor="@android:color/white"
-                        android:fontFamily="@font/poppins"/>
+                        android:textAllCaps="false"
+                        android:fontFamily="@font/poppins"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        app:cornerRadius="25dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- LOCATION CARD -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/locationCard"
                 android:layout_width="match_parent"
@@ -273,17 +278,20 @@
                             android:backgroundTint="@color/buttonGreen"
                             android:text="Pick on Map"
                             android:textColor="@android:color/white"
-                            android:fontFamily="@font/poppins"/>
+                            android:fontFamily="@font/poppins"
+                            app:cornerRadius="24dp"/>
 
                         <Button
                             android:id="@+id/saveLocationButton"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="48dp"
                             android:layout_marginStart="10dp"
                             android:backgroundTint="@color/buttonPurple"
                             android:text="Save"
                             android:textColor="@android:color/white"
-                            android:fontFamily="@font/poppins"/>
+                            android:textAllCaps="false"
+                            android:fontFamily="@font/poppins"
+                            app:cornerRadius="24dp"/>
                     </LinearLayout>
 
                     <TextView
@@ -297,22 +305,17 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- LOGOUT BUTTON -->
             <Button
                 android:id="@+id/logoutButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:text="Logout"
+                android:layout_marginTop="16dp"
                 android:backgroundTint="@color/buttonPurple"
                 android:textColor="@android:color/white"
                 android:fontFamily="@font/poppins"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="8dp"
-                android:layout_gravity="center_horizontal" />
+                app:layout_constraintTop_toBottomOf="@id/locationCard"
+                app:layout_constraintStart_toStartOf="parent"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

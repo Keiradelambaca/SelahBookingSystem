@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +18,6 @@ import com.example.selahbookingsystem.data.dto.BookingDto;
 import com.example.selahbookingsystem.data.store.TokenStore;
 import com.example.selahbookingsystem.network.api.ApiClient;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
-import com.example.selahbookingsystem.ui.base.BaseActivity;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -29,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CustomerHomeActivity extends BaseActivity {
+public class CustomerHomeActivity extends AppCompatActivity {
 
     private TextView titleText;
     private Button bookButton;
@@ -281,8 +281,4 @@ public class CustomerHomeActivity extends BaseActivity {
                         startActivity(next);
                     });
 
-    @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_home;
-    }
 }

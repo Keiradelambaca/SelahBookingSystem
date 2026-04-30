@@ -2,65 +2,78 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardChatPreview"
+    android:id="@+id/cardChat"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:layout_marginBottom="2dp"
-    app:cardCornerRadius="18dp"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/softWhite"
+    app:cardCornerRadius="20dp"
     app:cardElevation="2dp"
-    app:strokeWidth="1dp"
-    app:cardBackgroundColor="@color/softWhite">
+    app:strokeColor="#14000000"
+    app:strokeWidth="1dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="14dp">
+        android:minHeight="72dp"
+        android:orientation="horizontal"
+        android:padding="14dp"
+        android:gravity="center_vertical">
 
-        <!-- Profile image (circle) -->
+        <!-- Profile circle -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfile"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:contentDescription="@string/app_name"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/profile_icon"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Selah.Circle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:layout_marginEnd="12dp"/>
 
-        <!-- Name -->
-        <TextView
-            android:id="@+id/tvName"
+        <!-- Text content -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Saoirse Kelly"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/ivProfile"
-            app:layout_constraintTop_toTopOf="@id/ivProfile"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <!-- Last message snippet -->
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Client Name"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:fontFamily="@font/poppins"/>
+
+            <TextView
+                android:id="@+id/tvLastMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Last message preview goes here..."
+                android:textColor="@color/textGrey"
+                android:textSize="13sp"
+                android:fontFamily="@font/poppins"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+        </LinearLayout>
+
+        <!-- Time -->
         <TextView
-            android:id="@+id/tvLastMessage"
-            android:layout_width="0dp"
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="3dp"
-            android:text="Hey! Just checking if you’re free for Friday..."
-            android:textSize="14sp"
+            android:text="2:45 PM"
             android:textColor="@color/textGrey"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/ivProfile"
-            app:layout_constraintTop_toBottomOf="@id/tvName"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:textSize="11sp"
+            android:fontFamily="@font/poppins"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

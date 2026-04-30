@@ -1,27 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:strokeColor="#EFEFEF"
-    app:strokeWidth="1dp">
+    android:layout_marginBottom="14dp"
+    app:cardBackgroundColor="@color/softWhite"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="80dp"
         android:orientation="horizontal"
-        android:padding="14dp">
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/imgClientThumb"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:background="@drawable/placeholder_banner"
-            android:padding="12dp"
             android:src="@drawable/placeholder_profile"
             android:scaleType="centerInside" />
 
@@ -34,40 +32,33 @@
 
             <TextView
                 android:id="@+id/tvClientName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Client Name"
+                android:textStyle="bold"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
 
             <TextView
                 android:id="@+id/tvServiceName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="Acrylic Full Set"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
+                android:textColor="@color/textGrey"
+                android:textSize="14sp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
 
             <TextView
                 android:id="@+id/tvDateTime"
-                android:layout_width="wrap_content"
+                android:text="Tue 12 Mar • 2:00 PM"
+                android:textColor="@color/textGrey"
+                android:textSize="13sp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Tue 12 Mar • 2:00 PM - 3:30 PM"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
-
+                android:layout_width="wrap_content"/>
         </LinearLayout>
 
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/forward_arrow_icon"
-            android:contentDescription="@null" />
-
+            android:src="@drawable/forward_arrow_icon"/>
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

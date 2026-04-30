@@ -53,9 +53,9 @@ public class SPHomeActivity extends SPBaseActivity {
         super.onCreate(savedInstanceState);
 
         tvGreeting = findViewById(R.id.tvGreeting);
-        tvEmptyState = findViewById(R.id.tvEmptyState);
         rvAppointments = findViewById(R.id.rvAppointments);
 
+        tvEmptyState = findViewById(R.id.tvEmptyState);
         rvAppointments.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SPAppointmentCardAdapter(this, appointmentItems);
         rvAppointments.setAdapter(adapter);
