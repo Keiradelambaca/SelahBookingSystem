@@ -18,6 +18,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
 
+    protected abstract int getLayoutResourceId();
+
     @IdRes
     protected abstract int getBottomNavMenuItemId();
 

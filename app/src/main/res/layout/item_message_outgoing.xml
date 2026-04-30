@@ -16,9 +16,10 @@
         android:paddingEnd="14dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:text="Perfect! See you then 💗"
+        android:text="Perfect! See you then"
         android:textColor="@android:color/white"
         android:textSize="14sp"
+        android:fontFamily="@font/poppins"
         android:maxWidth="280dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>

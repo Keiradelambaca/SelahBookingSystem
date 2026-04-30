@@ -4,30 +4,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF7F8">
+    android:background="@color/signaturePink">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFF7F8"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/signaturePink"
         android:elevation="0dp"
         app:navigationIcon="@drawable/ic_back"
         app:title="Appointment"
-        app:titleTextColor="@color/black"
-        app:titleTextAppearance="@style/ToolbarTitleBold"/>
+        app:titleTextAppearance="@style/ToolbarTitleBold"
+        app:titleTextColor="@color/black" />
 
     <FrameLayout
         android:id="@+id/progress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="?attr/actionBarSize"
+        android:visibility="gone">
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center" />
+
     </FrameLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -49,17 +50,15 @@
                 android:layout_height="220dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/placeholder_banner"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Selah.RoundedLarge"/>
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Selah.RoundedLarge" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#EFE6E8"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/softWhite"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -70,16 +69,18 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="top">
+                        android:gravity="top"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/tvTitle"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:minHeight="42dp"
                             android:layout_weight="1"
+                            android:fontFamily="@font/poppins"
                             android:text="Acrylic Extensions"
-                            android:textColor="@android:color/black"
+                            android:textColor="@color/black"
                             android:textSize="22sp"
                             android:textStyle="bold" />
 
@@ -87,68 +88,80 @@
                             android:id="@+id/tvPrice"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minHeight="42dp"
+                            android:fontFamily="@font/poppins"
                             android:text="€0.00"
-                            android:textColor="@android:color/black"
+                            android:textColor="@color/black"
                             android:textSize="24sp"
                             android:textStyle="bold" />
+
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvProvider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="30dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="6dp"
                         android:text=""
-                        android:textSize="15sp"
-                        android:textColor="#5F5F5F"
-                        android:paddingTop="6dp"/>
+                        android:textColor="@color/textGrey"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:id="@+id/tvDateTime"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="34dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="10dp"
                         android:text=""
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="15sp"
-                        android:textColor="@android:color/black"
-                        android:paddingTop="10dp"/>
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:paddingTop="14dp">
 
                         <TextView
                             android:id="@+id/tvStatus"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:minHeight="36dp"
                             android:layout_weight="1"
+                            android:fontFamily="@font/poppins"
+                            android:gravity="center_vertical"
                             android:text=""
-                            android:textSize="14sp"
-                            android:textColor="@android:color/black"/>
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipPayment"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins"
                             android:text="Payment"
-                            android:textColor="@android:color/black"
+                            android:textColor="@color/black"
                             app:chipBackgroundColor="#F7E8EC"
-                            app:chipStrokeWidth="0dp"/>
+                            app:chipStrokeWidth="0dp" />
+
                     </LinearLayout>
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#EFE6E8"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/softWhite"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -159,32 +172,36 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="34dp"
+                        android:fontFamily="@font/poppins"
                         android:text="Booking breakdown"
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="18sp"
-                        android:textColor="@android:color/black"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="—"
-                        android:textColor="#5F5F5F"
-                        android:textSize="15sp"
+                        android:minHeight="70dp"
+                        android:fontFamily="@font/poppins"
                         android:lineSpacingExtra="4dp"
-                        android:paddingTop="10dp"/>
+                        android:paddingTop="10dp"
+                        android:text="—"
+                        android:textColor="@color/textGrey"
+                        android:textSize="15sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#EFE6E8"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/softWhite"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -195,77 +212,89 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="34dp"
+                        android:fontFamily="@font/poppins"
                         android:text="Receipt"
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="18sp"
-                        android:textColor="@android:color/black"/>
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:id="@+id/receiptItemsContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingTop="12dp"/>
+                        android:paddingTop="12dp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginTop="14dp"
                         android:layout_marginBottom="12dp"
-                        android:background="#EFE6E8"/>
+                        android:background="#EFE6E8" />
 
                     <TextView
                         android:id="@+id/tvSubtotal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="28dp"
+                        android:fontFamily="@font/poppins"
                         android:text="Left to pay calculation"
-                        android:textColor="#5F5F5F"
-                        android:textSize="14sp"/>
+                        android:textColor="@color/textGrey"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvTotal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="40dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="6dp"
                         android:text="Left to pay: €0.00"
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:textColor="@android:color/black"
-                        android:paddingTop="6dp"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvPaymentMethod"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="30dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="8dp"
                         android:text="—"
-                        android:textColor="#5F5F5F"
-                        android:textSize="14sp"
-                        android:paddingTop="8dp"/>
+                        android:textColor="@color/textGrey"
+                        android:textSize="14sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPay"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/poppins"
                 android:text="Pay now"
                 android:textAllCaps="false"
+                android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                app:cornerRadius="18dp"
-                app:backgroundTint="@android:color/black"
-                android:textColor="@android:color/white"/>
+                app:backgroundTint="@color/buttonPurple"
+                app:cornerRadius="28dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPayRemaining"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/poppins"
                 android:text="Pay remaining balance"
                 android:textAllCaps="false"
+                android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:layout_marginTop="12dp"
-                app:cornerRadius="18dp"
-                app:backgroundTint="@android:color/black"
-                android:textColor="@android:color/white"/>
+                app:backgroundTint="@color/buttonPurple"
+                app:cornerRadius="28dp" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/locationCard"
@@ -275,11 +304,9 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#EFE6E8"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/softWhite"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -290,29 +317,35 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="34dp"
+                        android:fontFamily="@font/poppins"
                         android:text="Location"
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="18sp"
-                        android:textColor="@android:color/black"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvLocationTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="34dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="12dp"
                         android:text="Business name"
-                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black"
-                        android:paddingTop="12dp"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvLocationSubtitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="28dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="3dp"
                         android:text="Eircode"
-                        android:textSize="14sp"
-                        android:textColor="#5F5F5F"
-                        android:paddingTop="3dp"/>
+                        android:textColor="@color/textGrey"
+                        android:textSize="14sp" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/mapClickableCard"
@@ -320,18 +353,18 @@
                         android:layout_height="170dp"
                         android:layout_marginTop="14dp"
                         android:clickable="true"
+                        android:clipToOutline="true"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
-                        android:clipToOutline="true"
-                        app:cardCornerRadius="22dp"
+                        app:cardBackgroundColor="#F2F2F2"
+                        app:cardCornerRadius="24dp"
                         app:cardElevation="0dp"
-                        app:strokeWidth="0dp"
-                        app:cardBackgroundColor="#F2F2F2">
+                        app:strokeWidth="0dp">
 
                         <FrameLayout
                             android:id="@+id/locationMapContainer"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent" />
 
                     </com.google.android.material.card.MaterialCardView>
 
@@ -339,62 +372,71 @@
                         android:id="@+id/tvLocationHint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="30dp"
+                        android:fontFamily="@font/poppins"
+                        android:paddingTop="10dp"
                         android:text="Tap the map to open in Google Maps"
-                        android:textSize="13sp"
-                        android:textColor="#5F5F5F"
-                        android:paddingTop="10dp"/>
+                        android:textColor="@color/textGrey"
+                        android:textSize="13sp" />
+
                 </LinearLayout>
+
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMessageProvider"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="14dp"
+                android:fontFamily="@font/poppins"
                 android:text="Message provider"
                 android:textAllCaps="false"
+                android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:layout_marginTop="14dp"
-                app:cornerRadius="18dp"
-                app:backgroundTint="#111111"
-                android:textColor="@android:color/white"/>
+                app:backgroundTint="@color/buttonPurple"
+                app:cornerRadius="28dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReschedule"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
+                    android:layout_height="54dp"
                     android:layout_weight="1"
+                    android:fontFamily="@font/poppins"
                     android:text="Reschedule"
                     android:textAllCaps="false"
-                    app:cornerRadius="18dp"
+                    android:textColor="@color/black"
                     app:backgroundTint="@android:color/white"
-                    android:textColor="@android:color/black"
+                    app:cornerRadius="27dp"
                     app:strokeColor="#DDDDDD"
-                    app:strokeWidth="1dp"/>
+                    app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCancel"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
-                    android:layout_weight="1"
+                    android:layout_height="54dp"
                     android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins"
                     android:text="Cancel"
                     android:textAllCaps="false"
-                    app:cornerRadius="18dp"
+                    android:textColor="#B00020"
                     app:backgroundTint="#FFF0F0"
-                    android:textColor="#B00020"/>
+                    app:cornerRadius="27dp" />
+
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="20dp"/>
+                android:layout_height="20dp" />
 
         </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

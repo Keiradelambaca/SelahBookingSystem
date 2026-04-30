@@ -184,7 +184,6 @@ public class BalancePaymentActivity extends AppCompatActivity {
 
                 Log.d("BALANCE", "Poll #" + pollAttempts + " => payment_status=" + pay);
 
-                // ✅ FIX: treat "paid" as success
                 if ("paid".equalsIgnoreCase(pay)) {
                     stopPolling();
 

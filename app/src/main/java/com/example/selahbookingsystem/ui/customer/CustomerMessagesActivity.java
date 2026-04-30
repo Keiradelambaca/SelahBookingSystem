@@ -31,9 +31,18 @@ public class CustomerMessagesActivity extends BaseActivity {
     private SupabaseRestService api;
 
     @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_messages;
+    }
+
+    @Override
+    protected int getBottomNavMenuItemId() {
+        return R.id.nav_messages;
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_messages);
 
         api = ApiClient.supabase();
 
@@ -72,7 +81,10 @@ public class CustomerMessagesActivity extends BaseActivity {
                 "last_message_at.desc.nullslast"
         ).enqueue(new Callback<List<ConversationPreviewDto>>() {
             @Override
-            public void onResponse(Call<List<ConversationPreviewDto>> call, Response<List<ConversationPreviewDto>> response) {
+            public void onResponse(
+                    Call<List<ConversationPreviewDto>> call,
+                    Response<List<ConversationPreviewDto>> response
+            ) {
                 chats.clear();
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -86,6 +98,8 @@ public class CustomerMessagesActivity extends BaseActivity {
                                 ""
                         ));
                     }
+                } else {
+                    Toast.makeText(CustomerMessagesActivity.this, "Failed to load chats", Toast.LENGTH_SHORT).show();
                 }
 
                 adapter.notifyDataSetChanged();
@@ -96,10 +110,5 @@ public class CustomerMessagesActivity extends BaseActivity {
                 Toast.makeText(CustomerMessagesActivity.this, "Failed to load chats", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    protected int getBottomNavMenuItemId() {
-        return R.id.nav_messages;
     }
 }
