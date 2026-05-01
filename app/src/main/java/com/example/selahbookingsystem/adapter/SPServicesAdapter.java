@@ -39,7 +39,6 @@ public class SPServicesAdapter extends RecyclerView.Adapter<SPServicesAdapter.VH
     @Override
     public long getItemId(int position) {
         ServiceDto s = items.get(position);
-        // If you changed id to Integer in ServiceDto, this is perfect.
         if (s != null && s.id != null) return s.id;
         return super.getItemId(position);
     }

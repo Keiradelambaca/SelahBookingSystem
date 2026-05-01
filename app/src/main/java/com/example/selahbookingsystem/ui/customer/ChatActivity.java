@@ -158,12 +158,10 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<com.example.selahbookingsystem.data.dto.ConversationDto>> call,
                                    Response<List<com.example.selahbookingsystem.data.dto.ConversationDto>> response) {
-                // No UI needed
             }
 
             @Override
             public void onFailure(Call<List<com.example.selahbookingsystem.data.dto.ConversationDto>> call, Throwable t) {
-                // Message was already sent, so do not block the user
             }
         });
     }

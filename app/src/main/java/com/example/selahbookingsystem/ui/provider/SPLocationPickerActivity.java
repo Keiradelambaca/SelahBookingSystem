@@ -174,7 +174,6 @@ public class SPLocationPickerActivity extends AppCompatActivity {
     }
 
     private String bestAddressLine(Address a) {
-        // Sometimes getAddressLine(0) is best; fall back to composed string
         String line0 = a.getMaxAddressLineIndex() >= 0 ? a.getAddressLine(0) : null;
         if (line0 != null && !line0.trim().isEmpty()) return line0.trim();
 
@@ -188,14 +187,14 @@ public class SPLocationPickerActivity extends AppCompatActivity {
     }
 
     private String extractEircode(Address a, String addressLine) {
-        // 1) Android sometimes puts Eircode in postalCode
+        // 1. Android sometimes puts Eircode in postalCode
         String postal = a.getPostalCode();
         if (postal != null && !postal.trim().isEmpty()) {
             Matcher m = EIRCODE_PATTERN.matcher(postal.trim());
             if (m.find()) return normalizeEircode(m.group());
         }
 
-        // 2) Try parsing from the address line
+        // 2. Try parsing from the address line
         if (addressLine != null) {
             Matcher m = EIRCODE_PATTERN.matcher(addressLine);
             if (m.find()) return normalizeEircode(m.group());
@@ -205,7 +204,6 @@ public class SPLocationPickerActivity extends AppCompatActivity {
     }
 
     private String normalizeEircode(String raw) {
-        // Make it "A65 F4E2" format when possible
         String cleaned = raw.toUpperCase(Locale.ROOT).replaceAll("\\s+", "");
         if (cleaned.length() == 7) {
             return cleaned.substring(0, 3) + " " + cleaned.substring(3);

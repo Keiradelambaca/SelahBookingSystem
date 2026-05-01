@@ -39,10 +39,6 @@ public class PickTimeslotActivity extends AppCompatActivity {
     public static final String EXTRA_INSPO_URI = "extra_inspo_uri";
     public static final String EXTRA_SELECTED_MAP = "extra_selected_map";
     public static final String EXTRA_EST_MINS = "extra_est_mins";
-    public static final String EXTRA_SERVICE_ID = "extra_service_id";
-    public static final String EXTRA_SELECTED_SLOT = "extra_selected_slot";
-
-    // ✅ NEW
     public static final String EXTRA_TOTAL_PRICE_CENTS = "extra_total_price_cents";
 
     @Override
@@ -56,8 +52,6 @@ public class PickTimeslotActivity extends AppCompatActivity {
         String inspoUri = getIntent().getStringExtra(EXTRA_INSPO_URI);
         String rawMap = getIntent().getStringExtra(EXTRA_SELECTED_MAP);
         int estMins = getIntent().getIntExtra(EXTRA_EST_MINS, 60);
-
-        // ✅ NEW
         int totalPriceCents = getIntent().getIntExtra(EXTRA_TOTAL_PRICE_CENTS, 0);
 
         if (TextUtils.isEmpty(providerId) || TextUtils.isEmpty(currentUri) || TextUtils.isEmpty(rawMap)) {
@@ -82,7 +76,6 @@ public class PickTimeslotActivity extends AppCompatActivity {
             i.putExtra(ConfirmBookingActivity.EXTRA_EST_MINS, estMins);
             i.putExtra(ConfirmBookingActivity.EXTRA_SELECTED_SLOT, slotLabel);
 
-            // ✅ pass price to ConfirmBooking (required for deposits)
             i.putExtra(ConfirmBookingActivity.EXTRA_TOTAL_PRICE_CENTS, totalPriceCents);
 
             startActivity(i);
@@ -167,7 +160,7 @@ public class PickTimeslotActivity extends AppCompatActivity {
         }
 
         LocalDate date = startDay.plusDays(offset);
-        int dbDow = date.getDayOfWeek().getValue() % 7; // Sun=0..Sat=6
+        int dbDow = date.getDayOfWeek().getValue() % 7;
         WeeklyAvailabilityDto weeklyRule = weeklyRules7.get(dbDow);
 
         loadDailyOverrideThenBookings(rest, providerId, date, weeklyRule, durationMins,

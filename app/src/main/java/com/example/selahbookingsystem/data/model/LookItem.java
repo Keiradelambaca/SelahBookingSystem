@@ -13,12 +13,10 @@ public class LookItem {
     private String description;
     private List<String> tags;
 
-    // UI state (not necessarily stored in DB)
     private boolean liked;
 
     public LookItem() {}
 
-    // --- Mapper from DTO ---
     public static LookItem fromDto(LookDto d) {
         LookItem i = new LookItem();
         i.id = d.id;
@@ -31,7 +29,6 @@ public class LookItem {
         return i;
     }
 
-    // --- Getters / Setters ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

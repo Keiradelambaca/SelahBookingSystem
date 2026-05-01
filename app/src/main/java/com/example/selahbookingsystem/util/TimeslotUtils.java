@@ -9,17 +9,15 @@ public class TimeslotUtils {
     public static final ZoneId PROVIDER_ZONE = ZoneId.of("Europe/Dublin");
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm", Locale.UK);
 
-    /** Booked range in UTC instants (recommended) */
     public static class Range {
         public final Instant start;
         public final Instant end;
         public Range(Instant s, Instant e) { start = s; end = e; }
     }
 
-    /** Availability window in local provider time (e.g. 09:00-17:00) */
     public static class Window {
-        public final String startTime; // "09:00:00"
-        public final String endTime;   // "17:00:00"
+        public final String startTime;
+        public final String endTime;
         public final boolean enabled;
 
         public Window(String startTime, String endTime, boolean enabled) {
@@ -29,7 +27,6 @@ public class TimeslotUtils {
         }
     }
 
-    /** A generated appointment slot */
     public static class Slot {
         public final Instant startUtc;
         public final Instant endUtc;
@@ -39,7 +36,6 @@ public class TimeslotUtils {
             this.endUtc = endUtc;
         }
 
-        /** label shown to user (local time) */
         public String label(LocalDate date) {
             LocalTime t = startUtc.atZone(PROVIDER_ZONE).toLocalTime();
             return date.toString() + " • " + t.format(TIME_FMT);
@@ -54,12 +50,6 @@ public class TimeslotUtils {
         return d.plusDays(1).atStartOfDay(PROVIDER_ZONE).toInstant();
     }
 
-    /**
-     * Preferred generator:
-     * - supports MULTIPLE windows (e.g. 09:00-12:00 + 13:00-17:00)
-     * - supports custom step (15/30)
-     * - returns real UTC instants for start/end (easy to create bookings)
-     */
     public static List<Slot> generateSlots(
             LocalDate date,
             List<Window> windows,
@@ -79,7 +69,6 @@ public class TimeslotUtils {
             LocalTime startT = parseLocalTime(w.startTime);
             LocalTime endT   = parseLocalTime(w.endTime);
 
-            // guard
             if (!endT.isAfter(startT)) continue;
 
             ZonedDateTime zStart = ZonedDateTime.of(date, startT, PROVIDER_ZONE);
@@ -97,7 +86,6 @@ public class TimeslotUtils {
             }
         }
 
-        // sort just in case multiple windows
         out.sort(Comparator.comparing(a -> a.startUtc));
         return out;
     }
@@ -117,9 +105,6 @@ public class TimeslotUtils {
         return LocalTime.parse(hhmmss);
     }
 
-    // -------------------------------------------------------
-    // Backwards-compatible method (your old one, still works)
-    // -------------------------------------------------------
     public static List<String> generateSlotLabels30Min(
             LocalDate date,
             String startTime,

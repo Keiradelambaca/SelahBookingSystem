@@ -51,7 +51,6 @@ public class ProviderClientsActivity extends AppCompatActivity {
         RecyclerView rv = findViewById(R.id.rvClients);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ClientsAdapter(client -> {
-            // Placeholder for Stripe later:
             Toast.makeText(this, "Charge remainder for " + client.fullName, Toast.LENGTH_SHORT).show();
         });
         rv.setAdapter(adapter);
@@ -92,7 +91,6 @@ public class ProviderClientsActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Group bookings by client_id
                 HashMap<String, ClientSummary> map = new HashMap<>();
 
                 for (SupabaseRestService.BookingWithClientDto b : resp.body()) {
@@ -108,13 +106,11 @@ public class ProviderClientsActivity extends AppCompatActivity {
                             cs.phone = b.client.phone;
                         }
                         cs.timesBooked = 0;
-                        cs.paymentText = "Saved card: —"; // placeholder until you wire Stripe
                         map.put(b.client_id, cs);
                     }
 
                     cs.timesBooked += 1;
 
-                    // Because we ordered start_time.desc, the first booking seen for a client is their latest
                     if (cs.lastAppointmentText == null) {
                         cs.lastAppointmentText = "Last appointment: " + formatAppt(b.start_time, b.end_time);
                     }
@@ -123,7 +119,6 @@ public class ProviderClientsActivity extends AppCompatActivity {
                 masterList.clear();
                 masterList.addAll(map.values());
 
-                // Optional: sort by name (stable UX)
                 masterList.sort((a, b) -> safe(a.fullName).compareToIgnoreCase(safe(b.fullName)));
 
                 adapter.submitList(new ArrayList<>(masterList));
@@ -162,7 +157,7 @@ public class ProviderClientsActivity extends AppCompatActivity {
                     .withZone(ZoneId.systemDefault());
 
             String startTxt = fmt.format(start);
-            return startTxt; // keep simple; add end time if you want
+            return startTxt;
         } catch (Exception e) {
             return "—";
         }

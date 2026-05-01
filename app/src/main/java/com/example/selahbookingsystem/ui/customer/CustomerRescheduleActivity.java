@@ -86,7 +86,6 @@ public class CustomerRescheduleActivity extends AppCompatActivity {
                 .build();
 
         picker.addOnPositiveButtonClickListener(selection -> {
-            // selection is UTC millis at midnight
             selectedDate = Instant.ofEpochMilli(selection)
                     .atZone(ZoneId.of("Europe/Dublin"))
                     .toLocalDate();
@@ -121,7 +120,7 @@ public class CustomerRescheduleActivity extends AppCompatActivity {
         String newStartIso = start.toInstant().toString();
         String newEndIso = end.toInstant().toString();
 
-        // 1) Update booking time in Supabase
+        // 1. Update booking time in Supabase
         SupabaseRestService.BookingUpdateBody body =
                 new SupabaseRestService.BookingUpdateBody("confirmed", newStartIso, newEndIso);
 
@@ -130,7 +129,7 @@ public class CustomerRescheduleActivity extends AppCompatActivity {
             public void onResponse(Call<List<BookingDto>> call, Response<List<BookingDto>> response) {
                 if (response.isSuccessful()) {
 
-                    // 2) Trigger rescheduled email via Edge Function
+                    // 2. Trigger rescheduled email via Edge Function
                     Map<String, Object> payload = new LinkedHashMap<>();
                     payload.put("booking_id", bookingId);
 

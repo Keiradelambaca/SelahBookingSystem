@@ -3,7 +3,6 @@ package com.example.selahbookingsystem.network.api;
 import android.content.Context;
 
 import com.example.selahbookingsystem.data.store.TokenStore;
-import com.example.selahbookingsystem.network.api.ServicesApi;
 import com.example.selahbookingsystem.network.service.SupabaseRestService;
 
 import java.util.concurrent.TimeUnit;
@@ -68,14 +67,6 @@ public class ApiClient {
                     .build();
         }
         return retrofit;
-    }
-
-    public static BookingsApi bookings() {
-        return get().create(BookingsApi.class);
-    }
-
-    public static ServicesApi services() {
-        return get().create(ServicesApi.class);
     }
 
     public static SupabaseRestService supabase() {

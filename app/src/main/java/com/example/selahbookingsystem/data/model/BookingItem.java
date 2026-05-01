@@ -11,6 +11,6 @@ public class BookingItem {
     @SerializedName("status") public String status;
     @SerializedName("inspo_photo_url") public String inspoPhotoUrl;
     @SerializedName("current_photo_url") public String currentPhotoUrl;
-    @SerializedName("details_json") public Object detailsJson; // fine for now
+    @SerializedName("details_json") public Object detailsJson;
     @SerializedName("duration_mins") public Integer durationMins;
 }

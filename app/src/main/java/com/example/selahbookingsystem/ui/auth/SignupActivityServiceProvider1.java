@@ -167,8 +167,6 @@ public class SignupActivityServiceProvider1 extends AppCompatActivity {
         body.phone         = phone;
         body.role          = "provider";
         body.business_name = businessName;
-        // If your table also stores eircode, add:
-        // body.eircode = eircode;
 
         api.insertProfile(body).enqueue(new Callback<List<SupabaseRestService.ProfileDto>>() {
             @Override

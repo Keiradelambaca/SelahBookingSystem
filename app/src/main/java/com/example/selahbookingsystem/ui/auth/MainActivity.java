@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         boolean validEmail = email.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(email).matches();
         boolean validPassword = password.length() >= 6 && password.matches(".*\\d.*") && !password.contains(" ");
 
-        // Validate first; do NOT hit network if invalid
         if (!validEmail && !validPassword) {
             validationText.setText("Invalid email and password.");
             return;
@@ -125,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 Session s = r.body();
                 String userId = (s.user != null ? s.user.id : null);
 
-                // Save tokens + expiry + userId + last email for auto-login
                 TokenStore.save(
                         MainActivity.this,
                         s.accessToken,
@@ -135,10 +133,6 @@ public class MainActivity extends AppCompatActivity {
                         email
                 );
 
-                // Optional: keep SessionManager in memory too (only if you actually have it)
-                // com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
-
-                // IMPORTANT: route based on DATABASE role (profiles.role), NOT RoleStore-by-email
                 runOnUiThread(() -> routeToCorrectHomeFromDbRole(userId));
 
             } catch (Exception ex) {
@@ -150,21 +144,15 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    /**
-     * Auto-login:
-     * - If access token valid -> route by DB role
-     * - Else refresh token -> save new session -> route by DB role
-     */
+
     private void autoRouteFromStoredSession() {
 
-        // If access token is still valid, route immediately (BUT STILL BY DB ROLE)
         if (TokenStore.isAccessTokenValid(this)) {
             String userId = TokenStore.getUserId(this);
             routeToCorrectHomeFromDbRole(userId);
             return;
         }
 
-        // Otherwise refresh token in background
         setLoading(true, "Restoring session...");
 
         new Thread(() -> {
@@ -196,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
                         email
                 );
 
-                // com.example.selahbookingsystem.data.session.SessionManager.setSession(s);
 
                 runOnUiThread(() -> routeToCorrectHomeFromDbRole(userId));
 
@@ -210,10 +197,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    /**
-     * ALWAYS route by the role stored in Supabase profiles table.
-     * This prevents "provider logs in -> client UI" caused by stale RoleStore/SharedPrefs.
-     */
+
     private void routeToCorrectHomeFromDbRole(String userId) {
 
         if (userId == null || userId.trim().isEmpty()) {
@@ -227,8 +211,6 @@ public class MainActivity extends AppCompatActivity {
 
         SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
 
-        // NOTE: you must have this endpoint in SupabaseRestService:
-        // Call<List<ProfileRoleDto>> getUserRole(@Query("id") String idEq, @Query("select") String select);
         api.getUserRole("eq." + userId, "role").enqueue(new Callback<List<ProfileRoleDto>>() {
             @Override
             public void onResponse(Call<List<ProfileRoleDto>> call, Response<List<ProfileRoleDto>> response) {

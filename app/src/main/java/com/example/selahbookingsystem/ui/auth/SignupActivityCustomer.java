@@ -46,7 +46,6 @@ public class SignupActivityCustomer extends AppCompatActivity {
     private TextView validationText;
     private TextView backToLoginText;
 
-    // Match Supabase enum: user_role = 'client' | 'provider'
     private String userRole = "client";
 
     @Override
@@ -55,13 +54,11 @@ public class SignupActivityCustomer extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup_customer);
 
-        // Role from chooser (optional)
         String fromIntent = getIntent().getStringExtra(SignupActivity1.EXTRA_ROLE);
         if (fromIntent != null && !fromIntent.trim().isEmpty()) {
             userRole = fromIntent;
         }
 
-        // ==== Bind views (IDs match your XML) ====
         fullNameEt       = findViewById(R.id.nameEditText);
         emailEt          = findViewById(R.id.emailEditText);
         phoneEt          = findViewById(R.id.editTextPhone);
@@ -117,7 +114,7 @@ public class SignupActivityCustomer extends AppCompatActivity {
         String dob      = dobEt.getText().toString().trim();
         String password = passwordEt.getText().toString().trim();
 
-        // ==== Validation ====
+        // Validation
         if (TextUtils.isEmpty(fullName) ||
                 TextUtils.isEmpty(email) ||
                 TextUtils.isEmpty(phone) ||
@@ -146,7 +143,7 @@ public class SignupActivityCustomer extends AppCompatActivity {
         validationText.setText("Creating account...");
         signupBtn.setEnabled(false);
 
-        // ==== Supabase auth sign-up ====
+        // Supabase auth sign-up
         GoTrueService auth = ApiClient.get().create(GoTrueService.class);
         SignUpReq body = new SignUpReq(email, password);
 
@@ -233,7 +230,5 @@ public class SignupActivityCustomer extends AppCompatActivity {
             }
         });
     }
-
-
 
 }

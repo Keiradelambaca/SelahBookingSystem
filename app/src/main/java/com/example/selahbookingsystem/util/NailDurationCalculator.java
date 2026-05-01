@@ -4,7 +4,6 @@ import java.util.Map;
 
 public class NailDurationCalculator {
 
-    // Phase 1 simple rules
     public static int estimateMinutes(Map<String, String> sel) {
         int mins = 0;
 

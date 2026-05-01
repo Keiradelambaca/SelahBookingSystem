@@ -22,7 +22,6 @@ public class TokenStore {
 
         long expiresAtMs = 0L;
         if (expiresInSeconds != null) {
-            // a small safety buffer so we refresh slightly before it expires
             expiresAtMs = System.currentTimeMillis() + (expiresInSeconds * 1000L) - 30_000L;
         }
 

@@ -158,7 +158,7 @@ public class SPAutoEmailsActivity extends SPBaseActivity {
             if (t.subject == null) t.subject = "";
             if (t.body == null) t.body = "";
             if (t.is_enabled == null) t.is_enabled = true;
-            t.provider_id = providerId; // ensure correct
+            t.provider_id = providerId;
         }
 
         SupabaseRestService api = ApiClient.get().create(SupabaseRestService.class);
@@ -174,7 +174,7 @@ public class SPAutoEmailsActivity extends SPBaseActivity {
 
                         if (response.isSuccessful()) {
                             toast("Saved");
-                            loadTemplates(); // reload to get ids/updated_at
+                            loadTemplates();
                         } else {
                             toast("Save failed (" + response.code() + ")");
                         }
@@ -188,30 +188,8 @@ public class SPAutoEmailsActivity extends SPBaseActivity {
                 });
     }
 
-
-    private String prettyType(String type) {
-        if ("BOOKING_CONFIRMATION".equals(type)) return "Booking confirmation";
-        if ("CANCELLATION".equals(type)) return "Cancellation";
-        if ("RESCHEDULED".equals(type)) return "Rescheduled";
-        if ("REMINDER_24H".equals(type)) return "24h reminder";
-        return type;
-    }
-
     private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
-    // helper for addIfMissing
-    private static class AddIfMissingList extends ArrayList<EmailTemplateDto> {
-        void addIfMissing(Set<String> have, String providerId, String type, String subject, String body) {
-            if (have.contains(type)) return;
-            EmailTemplateDto t = new EmailTemplateDto();
-            t.provider_id = providerId;
-            t.type = type;
-            t.subject = subject;
-            t.body = body;
-            t.is_enabled = true;
-            add(t);
-        }
-    }
 }

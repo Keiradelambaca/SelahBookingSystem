@@ -83,7 +83,6 @@ public class DepositPaymentActivity extends AppCompatActivity {
                 return;
             }
 
-            // Important: avoid calling function with 0 cents
             if (depositCents <= 0) {
                 Log.e("DEPOSIT", "depositCents is <= 0. totalCents=" + totalCents + " percent=" + percent);
                 toast("Deposit amount is missing. Please go back and try again.");
@@ -98,7 +97,6 @@ public class DepositPaymentActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // If user comes back from Stripe, start polling
         if (startedCheckout) {
             pollAttempts = 0;
             pollBookingStatus();

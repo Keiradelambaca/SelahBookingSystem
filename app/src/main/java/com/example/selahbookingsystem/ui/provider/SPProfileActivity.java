@@ -129,7 +129,7 @@ public class SPProfileActivity extends SPBaseActivity {
                     if (uri != null) {
                         profileImage.setImageURI(uri);
                         Toast.makeText(this, "Profile picture set (upload later)", Toast.LENGTH_SHORT).show();
-                        // TODO: upload to Supabase Storage and save profile_image_url
+
                     }
                 }
         );
@@ -141,7 +141,7 @@ public class SPProfileActivity extends SPBaseActivity {
                     if (success && profileCameraUri != null) {
                         profileImage.setImageURI(profileCameraUri);
                         Toast.makeText(this, "Profile photo captured (upload later)", Toast.LENGTH_SHORT).show();
-                        // TODO: upload to Supabase Storage and save profile_image_url
+
                     }
                 }
         );
@@ -153,7 +153,7 @@ public class SPProfileActivity extends SPBaseActivity {
                     if (uri != null) {
                         bannerImage.setImageURI(uri);
                         Toast.makeText(this, "Banner set (upload later)", Toast.LENGTH_SHORT).show();
-                        // TODO: upload to Supabase Storage and save banner_url
+
                     }
                 }
         );
@@ -334,7 +334,6 @@ public class SPProfileActivity extends SPBaseActivity {
 
         locationPreviewText.setText("Current: " + preview);
 
-        // Later: load profile image + banner from URLs using Glide
     }
 
     private String safe(String v) {

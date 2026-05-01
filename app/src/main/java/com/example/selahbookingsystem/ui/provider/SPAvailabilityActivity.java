@@ -97,9 +97,7 @@ public class SPAvailabilityActivity extends AppCompatActivity {
         picker.show(getSupportFragmentManager(), "datePicker");
     }
 
-    // -----------------------------
     // LOAD WEEKLY (ALWAYS 7 DAYS)
-    // -----------------------------
     private void loadWeeklyAvailability() {
         String providerId = TokenStore.getUserId(this);
         if (providerId == null || providerId.isEmpty()) {
@@ -167,9 +165,7 @@ public class SPAvailabilityActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // -----------------------------
-    // SAVE WEEKLY (UPDATE-THEN-INSERT, 409 SAFE)
-    // -----------------------------
+    // SAVE WEEKLY
     private void saveWeeklyAvailability() {
         String providerId = TokenStore.getUserId(this);
 
@@ -204,7 +200,6 @@ public class SPAvailabilityActivity extends AppCompatActivity {
 
         Log.d(TAG, "UPSERT dow=" + row.day_of_week + " id=" + row.id);
 
-        // 1) Try UPDATE by provider_id + day_of_week
         rest.updateWeeklyAvailabilityByProviderDay(
                 "eq." + providerId,
                 "eq." + row.day_of_week,
@@ -218,7 +213,6 @@ public class SPAvailabilityActivity extends AppCompatActivity {
                     return;
                 }
 
-                // If update affected 0 rows (common if no row exists OR RLS blocks update), then try INSERT
                 insertOrHandle409(rest, providerId, idx, body);
             }
 
@@ -241,7 +235,6 @@ public class SPAvailabilityActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 409 conflict: row already exists -> do one more UPDATE (covers race/rls edge cases)
                 if (resp.code() == 409) {
                     Log.w(TAG, "Insert 409 conflict. Retrying update for dow=" + body.day_of_week);
 

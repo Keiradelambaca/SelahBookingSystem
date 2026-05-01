@@ -38,7 +38,7 @@ public class SPDepositsPaymentsActivity extends SPBaseActivity {
     @Override
     protected int getSelectedNavItemId() {
         return R.id.nav_sp_scheduling;
-    } // stays highlighted in Scheduling tab
+    }
 
     private SwitchMaterial swEnableDeposits;
     private EditText etDepositPercent;
@@ -89,12 +89,10 @@ public class SPDepositsPaymentsActivity extends SPBaseActivity {
             return;
         }
 
-        // GET provider_settings?provider_id=eq.<id>&select=*
         rest.getProviderSettings("eq." + providerId, "*").enqueue(new Callback<List<ProviderSettingsDto>>() {
             @Override
             public void onResponse(Call<List<ProviderSettingsDto>> call, Response<List<ProviderSettingsDto>> resp) {
                 if (!resp.isSuccessful()) {
-                    // If table exists but row doesn't, PostgREST often returns 200 with [].
                     Toast.makeText(SPDepositsPaymentsActivity.this, "Could not load settings", Toast.LENGTH_SHORT).show();
                     applyDefaults();
                     return;
@@ -148,7 +146,6 @@ public class SPDepositsPaymentsActivity extends SPBaseActivity {
         boolean enabled = swEnableDeposits.isChecked();
         int p = enabled ? readPercent() : 0;
 
-        // Example using €100.00
         int totalCents = 10000;
         int depositCents = (int) Math.round(totalCents * (p / 100.0));
         double depositEuro = depositCents / 100.0;

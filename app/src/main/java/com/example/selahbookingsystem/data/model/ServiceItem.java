@@ -8,7 +8,6 @@ public class ServiceItem {
     @SerializedName("id")
     public String id;
 
-    // change this if your services table uses a different column name like "name" or "title"
     @SerializedName("name")
     public String name;
 
@@ -18,6 +17,4 @@ public class ServiceItem {
     @SerializedName("price")
     public Integer price;
 
-    @Nullable
-    public Integer base_price_cents;
 }

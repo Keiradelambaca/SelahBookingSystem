@@ -35,22 +35,5 @@ public class RoleStore {
                 .apply();
     }
 
-    // GETTERS
-    public static Role getRole(Context ctx, String email) {
-        String v = prefs(ctx).getString(KEY_ROLE_PREFIX + email, null);
-        if (v == null) return Role.UNKNOWN;
-        try { return Role.valueOf(v); } catch (Exception e) { return Role.UNKNOWN; }
-    }
 
-    public static String getPhone(Context ctx, String email) {
-        return prefs(ctx).getString(KEY_PHONE_PREFIX + email, "");
-    }
-
-    public static String getEircode(Context ctx, String email) {
-        return prefs(ctx).getString(KEY_EIRCODE_PREFIX + email, "");
-    }
-
-    public static String getName(Context ctx, String email) {
-        return prefs(ctx).getString(KEY_NAME_PREFIX + email, "");
-    }
 }
